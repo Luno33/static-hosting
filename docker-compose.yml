@@ -14,7 +14,7 @@ services:
       - MINIO_ROOT_USER=minio-root-user
       - MINIO_ROOT_PASSWORD=minio-root-password
     volumes:
-      - ~/Projects/blog/static-hosting/minio/data:/data
+      - ./minio/data:/data
     networks:
       - app-tier
     restart: unless-stopped
@@ -25,11 +25,12 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ~/Projects/blog/static-hosting/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
-      - ~/Projects/blog/static-hosting/nginx/conf/custom-conf:/etc/nginx/custom-conf/
-      - ~/Projects/blog/static-hosting/nginx/www:/var/www/
-      - ~/Projects/blog/static-hosting/self-signed/certs/nginx-selfsigned.crt:/etc/ssl/certs/nginx-selfsigned.crt
-      - ~/Projects/blog/static-hosting/self-signed/private/nginx-selfsigned.key:/etc/ssl/private/nginx-selfsigned.key
+      - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf/custom-conf:/etc/nginx/custom-conf/
+      - ./nginx/www:/var/www/
+      - ./self-signed/certs/:/etc/ssl/certs/
+      - ./self-signed/private/:/etc/ssl/private/
+      - ../personal/out:/data/personal-website/out
     logging:
       options:
         max-size: "10m"
