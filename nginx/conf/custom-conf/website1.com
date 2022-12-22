@@ -10,4 +10,8 @@ server {
         location / {
                 proxy_pass http://minio-server/personal-website/out$uri$is_args$args;
         }
+
+        location ^~ /.well-known/acme-challenge/ {
+            root /var/www/certbot/personal-website/;
+        }
 }

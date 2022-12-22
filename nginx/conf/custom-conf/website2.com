@@ -12,4 +12,8 @@ server {
         location / {
                 proxy_pass http://timebite.net/$uri$is_args$args;
         }
+
+        location ^~ /.well-known/acme-challenge/ {
+            root /var/www/certbot/timebite-website/;
+        }
 }
