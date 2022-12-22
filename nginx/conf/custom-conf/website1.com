@@ -18,6 +18,10 @@ server {
         ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
 
         location / {
+                rewrite ^/$ /index.html;
+                expires 1y;
+                access_log off;
+                add_header Cache-Control "max-age=31556952, public";
                 proxy_pass http://minio-server/personal-website/out$uri$is_args$args;
         }
 

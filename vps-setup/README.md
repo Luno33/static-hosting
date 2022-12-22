@@ -37,3 +37,11 @@ To send ssh key password and sudo password use:
 cd ./ansible
 ansible-playbook ./setup.yml -i hosts -kK
 ```
+
+## Run the services
+
+This command needs to be runned inside the VPS
+
+```
+sudo docker compose up
+```

@@ -6,6 +6,12 @@
 sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./self-signed/private/nginx-selfsigned.key -out ./self-signed/certs/nginx-selfsigned.crt
 ```
 
+change it to be readable (needed on the Ubuntu VPS)
+
+```
+sudo chmod +x ./self-signed/private/nginx-selfsigned.key
+```
+
 ## Prerequisites to obtain a certificate
 
 ### Email
