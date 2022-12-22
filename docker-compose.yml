@@ -28,6 +28,8 @@ services:
       - ~/Projects/blog/static-hosting/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
       - ~/Projects/blog/static-hosting/nginx/conf/custom-conf:/etc/nginx/custom-conf/
       - ~/Projects/blog/static-hosting/nginx/www:/var/www/
+      - ~/Projects/blog/static-hosting/self-signed/certs/nginx-selfsigned.crt:/etc/ssl/certs/nginx-selfsigned.crt
+      - ~/Projects/blog/static-hosting/self-signed/private/nginx-selfsigned.key:/etc/ssl/private/nginx-selfsigned.key
     logging:
       options:
         max-size: "10m"
