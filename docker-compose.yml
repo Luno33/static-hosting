@@ -26,8 +26,7 @@ services:
       - "443:443"
     volumes:
       - ~/Projects/blog/static-hosting/nginx/conf/nginx.conf:/etc/nginx/nginx.conf
-      - ~/Projects/blog/static-hosting/nginx/sites-available:/etc/nginx/sites-available/
-      - ~/Projects/blog/static-hosting/nginx/sites-enabled:/etc/nginx/sites-enabled/
+      - ~/Projects/blog/static-hosting/nginx/conf/custom-conf:/etc/nginx/custom-conf/
       - ~/Projects/blog/static-hosting/nginx/www:/var/www/
     logging:
       options:

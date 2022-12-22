@@ -7,7 +7,9 @@ server {
 
         server_name website2.com www.website2.com;
 
+        resolver 8.8.8.8;
+
         location / {
-                try_files $uri $uri/ =404;
+                proxy_pass http://timebite.net/$uri$is_args$args;
         }
 }
