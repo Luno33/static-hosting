@@ -1,3 +1,4 @@
 minio/data
 self-signed/certs/nginx-selfsigned.crt
 self-signed/private/nginx-selfsigned.key
+vps-setup/ansible/hosts

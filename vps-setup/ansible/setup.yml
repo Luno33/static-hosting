@@ -1,0 +1,104 @@
+- hosts: all
+  become: true
+  tasks:
+    - name: Set SWAP size
+      shell: | 
+        fallocate -l {{ server_swap_size }} /swapfile
+        chmod 600 /swapfile
+        mkswap /swapfile
+        swapon /swapfile
+        echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+      changed_when: false
+
+    - name: Apt update
+      command: "apt-get update"
+      changed_when: false
+    
+    - name: Apt upgrade
+      command: "apt-get upgrade -y"
+      changed_when: false
+
+    - name: Install htop and fix missing locales
+      command: "apt-get install -y htop locales-all"
+      changed_when: false
+      
+    - name: Make sure snapd is installed
+      apt:
+        name:
+          - snapd
+        state: present
+
+    - name: Install Docker dependencies
+      command: "apt-get install -y ca-certificates curl gnupg lsb-release"
+      changed_when: false
+    
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+    
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Install Docker
+      command: "apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin"
+      changed_when: false
+
+    - name: Creates directory
+      file:
+        path: "/home/{{ lookup('env','LOGIN_USER') }}/{{ item }}"
+        state: directory
+        owner: "{{ lookup('env','LOGIN_USER') }}"
+        group: sudo        
+        mode: 0777
+      with_items:
+        - minio
+        - minio/data
+        - minio/policies
+        - self-signed
+        - self-signed/certs
+        - self-signed/private
+      environment:
+        LOGIN_USER: $LOGIN_USER
+
+    - name: Copy nginx conf folder
+      copy:
+        src: ../../nginx/
+        dest: "/home/{{ lookup('env','LOGIN_USER') }}/nginx/"
+        owner: "{{ lookup('env','LOGIN_USER') }}"
+        group: sudo        
+        mode: 0777
+      environment:
+        LOGIN_USER: $LOGIN_USER
+    
+    - name: Copy minio policy
+      copy:
+        src: ../../minio/policies/minio-personal-website-access-policy.json
+        dest: "/home/{{ lookup('env','LOGIN_USER') }}/minio/policies/minio-personal-website-access-policy.json"
+        owner: "{{ lookup('env','LOGIN_USER') }}"
+        group: sudo        
+        mode: 0777
+      environment:
+        LOGIN_USER: $LOGIN_USER
+
+    - name: Copy main docker compose
+      copy:
+        src: ../../docker-compose.yml
+        dest: "/home/{{ lookup('env','LOGIN_USER') }}/docker-compose.yml"
+        owner: "{{ lookup('env','LOGIN_USER') }}"
+        group: sudo        
+        mode: 0777
+      environment:
+        LOGIN_USER: $LOGIN_USER
+    
+    - name: Copy certbot docker compose
+      copy:
+        src: ../../certbot-docker-compose.yml
+        dest: "/home/{{ lookup('env','LOGIN_USER') }}/certbot-docker-compose.yml"
+        owner: "{{ lookup('env','LOGIN_USER') }}"
+        group: sudo        
+        mode: 0777
+      environment:
+        LOGIN_USER: $LOGIN_USER
