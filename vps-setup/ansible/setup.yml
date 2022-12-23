@@ -102,3 +102,16 @@
         mode: 0777
       environment:
         LOGIN_USER: $LOGIN_USER
+
+    - name: Add Docker Group
+      command: "groupadd docker"
+      changed_when: false
+      ignore_errors: true
+      environment:
+        LOGIN_USER: $LOGIN_USER
+
+    - name: Add Docker Group to sudoer
+      command: "usermod -aG docker {{ lookup('env','LOGIN_USER') }}"
+      changed_when: false
+      environment:
+        LOGIN_USER: $LOGIN_USER
