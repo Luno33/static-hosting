@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  certbot:
+    container_name: certbot
+    image: certbot/certbot
+    volumes: 
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www/test.timebite.net:/var/www/certbot
+    command: certonly --non-interactive --webroot -v -w /var/www/certbot --force-renewal ${ACME_EMAIL} -d test.timebite.net --agree-tos

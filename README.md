@@ -36,7 +36,7 @@ export ACME_EMAIL=""
 These are the domains for which certbot will request a certificate:
 
 ```bash
-export ACME_DOMAINS="-d DOMAIN1.com -d DOMAIN2.COM"
+export ACME_DOMAIN="-d DOMAIN.com"
 ```
 
 ---
@@ -44,5 +44,5 @@ export ACME_DOMAINS="-d DOMAIN1.com -d DOMAIN2.COM"
 ## Run container to request certificates
 
 ```
-docker-compose -f certbot-docker-compose.yml up
+docker compose -f certbot-docker-compose.yml up
 ```

@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  certbot:
+    container_name: certbot
+    image: certbot/certbot
+    volumes: 
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www/marco.busacchi.com:/var/www/certbot
+    command: certonly --non-interactive --webroot -v -w /var/www/certbot --force-renewal ${ACME_EMAIL} -d marco.busacchi.com --agree-tos
