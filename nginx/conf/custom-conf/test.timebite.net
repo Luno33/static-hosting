@@ -10,8 +10,14 @@ server {
         listen 443 ssl http2;
         listen [::]:443 ssl http2;
         server_name test.timebite.net www.test.timebite.net;
+
+        # self-signed certificates
         ssl_certificate     /etc/ssl/certs/nginx-selfsigned.crt;
         ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+
+        # letsencrypt certificates
+	# ssl_certificate     /etc/letsencrypt/live/certificates.com/fullchain.pem;
+        # ssl_certificate_key /etc/letsencrypt/live/certificates.com/privkey.pem;
 
         location / {
                 rewrite ^/$ /index.html;
@@ -22,6 +28,6 @@ server {
         }
 
         location ^~ /.well-known/acme-challenge/ {
-            alias /var/www/certbot/test.timebite.net/.well-known/acme-challenge/;
+            	alias /var/www/certbot/.well-known/acme-challenge/;
         }
 }

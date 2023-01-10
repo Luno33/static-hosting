@@ -27,8 +27,8 @@ services:
     volumes:
       - ./nginx/conf/nginx.conf:/etc/nginx/nginx.conf
       - ./nginx/conf/custom-conf:/etc/nginx/custom-conf/
-      - ./certbot/www/marco.busacchi.com:/var/www/certbot/marco.busacchi.com
-      - ./certbot/www/test.timebite.net:/var/www/certbot/test.timebite.net
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
       - ./self-signed/certs/:/etc/ssl/certs/
       - ./self-signed/private/:/etc/ssl/private/
     logging:

@@ -1,7 +1,3 @@
-upstream minio-server {
-        server minio:9000;
-}
-
 server {
         listen 80;
         listen [::]:80;
@@ -26,6 +22,6 @@ server {
         }
 
         location ^~ /.well-known/acme-challenge/ {
-            root /var/www/certbot/personal-website/;
+            alias /var/www/certbot/.well-known/acme-challenge/;
         }
 }

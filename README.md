@@ -36,7 +36,7 @@ export ACME_EMAIL=""
 These are the domains for which certbot will request a certificate:
 
 ```bash
-export ACME_DOMAIN="-d DOMAIN.com"
+export ACME_DOMAINS="-d DOMAIN1.com -d DOMAIN2.com"
 ```
 
 ---
