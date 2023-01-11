@@ -7,4 +7,4 @@ services:
     volumes: 
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    command: certonly --non-interactive --cert-name certificates --webroot -w /var/www/certbot --force-renewal ${ACME_EMAIL} ${ACME_DOMAINS} --agree-tos
+    command: certonly --non-interactive --cert-name certificates.com --webroot -w /var/www/certbot --force-renewal ${ACME_EMAIL} ${ACME_DOMAINS} --agree-tos

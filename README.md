@@ -46,3 +46,9 @@ export ACME_DOMAINS="-d DOMAIN1.com -d DOMAIN2.com"
 ```
 docker compose -f certbot-docker-compose.yml up
 ```
+
+with just an all-in-one command
+
+```
+ACME_EMAIL="" ACME_DOMAINS="-d DOMAIN1.com -d DOMAIN2.com" docker compose -f certbot-docker-compose.yml up
+```
