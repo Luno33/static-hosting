@@ -2,10 +2,10 @@ server {
         listen 80;
         listen [::]:80;
 
-        root /var/www/website2.com/html;
+        root /var/www/website3.com/html;
         index index.html index.htm index.nginx-debian.html;
 
-        server_name website2.com www.website2.com;
+        server_name website3.com www.website3.com;
 
         resolver 8.8.8.8;
 
