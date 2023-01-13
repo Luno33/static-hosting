@@ -3,7 +3,7 @@
 This project demonstrate how to self-host multiple websites on a 5.99 euro/month VPS (https://webdock.io/en/pricing).
 
 It uses:
-- **Minio** (https://min.io/) to have a self-hosted alternative to AWS S3 or Google Cloud Storage
+- **Minio** (https://min.io/) to have a self-hosted alternative to AWS S3. Since it uses the same api as AWS S3, it is compatible with AWS CLI, more info [here](minio/notes.md)
 - **Nginx** (https://www.nginx.com/) to handle caching and forwarding of traffic to Minio
 - **Let's encrypt** (https://letsencrypt.org/) to handle SSL certificates
 - **Docker** (https://www.docker.com/) as a containerization system
