@@ -15,6 +15,7 @@
 11. Modify the Nginx configuration to use the Let's Encrypt certificates
 12. Navigate with the browser to one of your `WEBSITE_PRODUCTION_DOMAINS` domain and you should see your website
 13. Set up a crontab to renew certificates
+14. (optional) Check your certificates
 
 ## Step 1
 
@@ -150,3 +151,11 @@ crontab -e
 ```
 
 To see if something went wrong with the previous renewals check the logs on the server in the folder `~/certbot/log/letsencrypt`.
+
+## Step 14
+
+Check it by using the certbot-check-docker-compose.yml conf
+
+```
+docker compose -f certbot-check-docker-compose.yml up
+```
