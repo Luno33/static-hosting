@@ -12,11 +12,11 @@ server {
         server_name busacchi.com www.busacchi.com;
         
         # self-signed certificates
-	      ssl_certificate     /etc/ssl/certs/nginx-selfsigned.crt;
+	ssl_certificate     /etc/ssl/certs/nginx-selfsigned.crt;
         ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
 
         # letsencrypt certificates
-	      # ssl_certificate     /etc/letsencrypt/live/certificates.com/fullchain.pem;
+	# ssl_certificate     /etc/letsencrypt/live/certificates.com/fullchain.pem;
         # ssl_certificate_key /etc/letsencrypt/live/certificates.com/privkey.pem;
 
         location / {
