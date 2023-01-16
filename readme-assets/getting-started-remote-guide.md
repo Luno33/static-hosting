@@ -109,7 +109,7 @@ You can generate (and renew) certificates with just one command line command.
 Remember to substitute `your@email.com` with your actual email and `website1prod.com`/`website2prod.com` with the domains that you want to request a certificate for.
 
 ```
-ACME_EMAIL='--email your@email.com' ACME_DOMAINS='-d website1prod.com -d website2prod.com' docker compose -f certbot-docker-compose.yml up
+ACME_EMAIL='--email your@email.com' ACME_DOMAINS='-d website1prod.com -d website2prod.com' docker compose -f docker-compose-certbot.yml up
 ```
 
 ## Step 11
@@ -141,7 +141,7 @@ If run on the server, this command will add a monthly execution of the certifica
 Remember to do the variable substitutions as in Step 10.
 
 ```
-(crontab -l | grep . ; echo -e "0 0 1 * * ACME_EMAIL='--email test@test.com' ACME_DOMAINS='-d DOMAIN1.com -d DOMAIN2.com' docker compose -f certbot-docker-compose.yml up\n") | crontab -
+(crontab -l | grep . ; echo -e "0 0 1 * * ACME_EMAIL='--email test@test.com' ACME_DOMAINS='-d DOMAIN1.com -d DOMAIN2.com' docker compose -f docker-compose-certbot.yml up\n") | crontab -
 ```
 
 If you want to check manually, run
@@ -154,8 +154,8 @@ To see if something went wrong with the previous renewals check the logs on the 
 
 ## Step 14
 
-Check it by using the certbot-check-docker-compose.yml conf
+Check it by using the docker-compose-certbot-check.yml conf
 
 ```
-docker compose -f certbot-check-docker-compose.yml up
+docker compose -f docker-compose-certbot-check.yml up
 ```

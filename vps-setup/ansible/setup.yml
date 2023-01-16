@@ -95,8 +95,8 @@
     
     - name: Copy certbot docker compose
       copy:
-        src: ../../certbot-docker-compose.yml
-        dest: "/home/{{ lookup('env','LOGIN_USER') }}/certbot-docker-compose.yml"
+        src: ../../docker-compose-certbot.yml
+        dest: "/home/{{ lookup('env','LOGIN_USER') }}/docker-compose-certbot.yml"
         owner: "{{ lookup('env','LOGIN_USER') }}"
         group: sudo        
         mode: 0777
