@@ -80,7 +80,7 @@ Now that you've logged in, from the "Buckets" tab you'll be able to create a new
 
 ![bucket creation](./images/bucket-creation.png)
 
-If you are using the default nginx configuration present in this repository in the files `nginx/conf/custom-conf/website1dev.com` and `nginx/conf/custom-conf/website2dev.com`, you'll have to create two buckets names `website1` and `website2` and you'll have to place in the root of those two buckets the index files of your two websites.
+If you are using the default nginx configuration present in this repository in the files `nginx/conf/custom-conf/website1dev.com` and `nginx/conf/custom-conf/website2dev.com`, you'll have to create two buckets names `website1` and `website2` and you'll have to place in the root of those two buckets a folder named `out` and, inside that folder, files of your two websites.
 
 ## Step 9
 

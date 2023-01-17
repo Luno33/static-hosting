@@ -24,7 +24,7 @@ server {
                 expires 1y;
                 access_log off;
                 add_header Cache-Control "max-age=31556952, public";
-                proxy_pass http://minio-server/website2$uri$is_args$args;
+                proxy_pass http://minio-server/website2/out$uri$is_args$args;
         }
 
         location ^~ /.well-known/acme-challenge/ {
