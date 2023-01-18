@@ -7,7 +7,7 @@
     2. push to the VPS all the file from this repository that are needed
 4. SSH into the server and generate self-signed certificates
 5. Point your domain on your VPS IP address
-6. SSH into the server and customize the Nginx files to reflect your `WEBSITE_PRODUCTION_DOMAINS`, self-signed certificate files, and the Minio url that will point at your `WEBSITE_NAMES`
+6. SSH into the server and customize the Nginx files to reflect your `WEBSITE_PRODUCTION_DOMAINS`, self-signed certificate files, the Minio url that will point at your `WEBSITE_NAMES` and the Umami nginx configuration
 7. SSH into the server and spin up Nginx and Minio with docker compose locally
 8. Go on the Minio portal and create a bucket for each `WEBSITE_NAMES`, called `WEBSITE_NAME`, containing your website files
 9. Update Minio policy to give permission to everyone to see the files
@@ -49,7 +49,11 @@ sudo chmod +x ./self-signed/private/nginx-selfsigned.key
 
 If you did not buy a domain yet, you can buy it from https://www.namecheap.com/, https://www.godaddy.com/, https://domains.google/, etc...
 
-When you have one, set up your CDN to point at your VPS IP address.
+When you have one, set up your CDN to point at your VPS IP address for the domain you've chosen, for this guide it would be `website1prod.com`, `website2prod.com`.
+
+Umami will be just one instance that can serve all of your website. To work, it needs it's own subdomain on one of the domains you already own, so choose one of your domain that will be used for the `tracking` subdomain.
+
+In this case I've chosen the `website1prod.com` domain to have the `tracking` subdomain, so point `tracking.website1.prod` to your VPS IP address.
 
 ## Step 6
 
@@ -72,6 +76,10 @@ ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
 ```
 
 The letsencrypt certificates are commented out, and it's ok like this for now.
+
+On the server, the file `nginx/conf/custom-conf/tracking.website1prod.com` already configure how to expose Umami on the `tracking` subdomain of the `website1dev.com` domain.
+
+Exactly like it happened for `nginx/conf/custom-conf/website1prod.com` and `nginx/conf/custom-conf/website2prod.com`, the letsencrypt certificates are commented out for now.
 
 ## Step 7
 
@@ -106,17 +114,17 @@ If your buckets are not called `website1` and `website2` remember to change the 
 
 You can generate (and renew) certificates with just one command line command.
 
-Remember to substitute `your@email.com` with your actual email and `website1prod.com`/`website2prod.com` with the domains that you want to request a certificate for.
+Remember to substitute `your@email.com` with your actual email and `website1prod.com`/`website2prod.com`/`tracking.website1prod.com` with the domains that you want to request a certificate for.
 
 ```
-ACME_EMAIL='--email your@email.com' ACME_DOMAINS='-d website1prod.com -d website2prod.com' docker compose -f docker-compose-certbot.yml up
+ACME_EMAIL='--email your@email.com' ACME_DOMAINS='-d website1prod.com -d website2prod.com -d tracking.website1prod.com' docker compose -f docker-compose-certbot.yml up
 ```
 
 ## Step 11
 
 Remember in step 6 that the Let's Encript certificates usage was commented out and was active the usage of self-signed certificates?
 
-Now it's time to swap those comment lines:
+Now it's time to swap those comment lines from the files `nginx/conf/custom-conf/website1prod.com`, `nginx/conf/custom-conf/website2prod.com`, and `nginx/conf/custom-conf/tracking.website1dev.com`:
 
 ```
 # self-signed certificates
@@ -133,6 +141,8 @@ ssl_certificate_key /etc/letsencrypt/live/certificates.com/privkey.pem;
 Well Done! 
 
 You should be able to hit https://website1prod.com and see your website in the website1 bucket. Likewise for website2!
+
+Now you are also able to go to https://tracking.website1prod.com and configure Umami (and your website code) like the guide says: https://umami.is/docs/login.
 
 ## Step 13
 

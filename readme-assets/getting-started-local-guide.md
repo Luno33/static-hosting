@@ -4,7 +4,7 @@
 2. Install on your machine docker
 3. Generate self-signed certificates for local development
 4. Modify your /etc/hosts to put a redirect from your `WEBSITE_DEVELOPMENT_DOMAINS` to your localhost
-5. Customize the Nginx files to reflect your `WEBSITE_DEVELOPMENT_DOMAINS`, self-signed certificate files, and the Minio url that will point at your `WEBSITE_NAMES`
+5. Customize the Nginx files to reflect your `WEBSITE_DEVELOPMENT_DOMAINS`, self-signed certificate files, the Minio url that will point at your `WEBSITE_NAMES` and the Umami nginx configuration
 6. Decide an user/password combination for Minio and write it in the docker compose file `./docker-compose.yml`
 7. Spin up Nginx and Minio with docker compose locally
 8. Go on the Minio portal and create a bucket for each `WEBSITE_NAMES`, called `WEBSITE_NAME`, containing your website files
@@ -46,9 +46,14 @@ and add at the end the lines referring to your domains (in this guide two)
 ```
 127.0.0.1 website1dev.com www.website1dev.com
 127.0.0.1 website2dev.com www.website2dev.com
+127.0.0.1 tracking.website1dev.com www.tracking.website1dev.com
 ```
 
 Doing this, when you'll search on your browser website1dev.com or www.website1dev.com, it will be resolved by your local machine to 127.0.0.1, that is localhost.
+
+Umami will be just one instance that can serve all of your website. To work, it needs it's own subdomain on one of the domains you already own, so choose one of your domain that will be used for the `tracking` subdomain.
+
+In this case I've chosen the website1dev.com domain to handle the tracking subdomain.
 
 ## Step 5
 
@@ -57,6 +62,8 @@ The file `nginx/conf/nginx.conf` is the default file that will get mounted and u
 The configurations for your websites goes under `nginx/conf/custom-conf`, where you'll find already there some real-world examples.
 
 The files `nginx/conf/custom-conf/website1dev.com` and `nginx/conf/custom-conf/website2dev.com` already represents two fully working configurations to expose `website1` and `website2`.
+
+The file `nginx/conf/custom-conf/tracking.website1dev.com` already configure how to expose Umami on the `tracking` subdomain of the `website1dev.com` domain
 
 ## Step 6
 
@@ -95,3 +102,5 @@ If your buckets are not called `website1` and `website2` remember to change the 
 Well Done! 
 
 You should be able to hit https://website1dev.com and see your website in the website1 bucket. Likewise for website2!
+
+Now you are also able to go to https://tracking.website1dev.com and configure Umami (and your website code) like the guide says: https://umami.is/docs/login.
