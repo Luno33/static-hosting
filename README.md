@@ -58,3 +58,7 @@ For more detailed information look at [readme-assets/getting-started-local-guide
 14. (optional) Check your certificates
 
 For more detailed information look at [readme-assets/getting-started-remote-guide.md](readme-assets/getting-started-remote-guide.md)
+
+# Some notes regarding Umami
+
+[umami/README.md](umami/README.md)
