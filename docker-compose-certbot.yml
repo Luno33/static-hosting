@@ -8,4 +8,4 @@ services:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
       - ./certbot/log/letsencrypt/:/var/log/letsencrypt/
-    command: certonly --non-interactive --cert-name certificates.com --webroot -w /var/www/certbot --force-renewal ${ACME_EMAIL} --expand ${ACME_DOMAINS} --allow-subset-of-names --agree-tos
+    command: certonly --non-interactive --cert-name certificates.com --webroot -w /var/www/certbot --force-renewal ${ACME_EMAIL} --expand ${ACME_DOMAINS} --allow-subset-of-names -v --agree-tos
