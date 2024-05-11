@@ -6,7 +6,7 @@ networks:
 services:
   umami:
     container_name: umami
-    image: ghcr.io/umami-software/umami:postgresql-v1.39.5
+    image: ghcr.io/umami-software/umami:postgresql-v2.11.3
     environment:
       DATABASE_URL: postgresql://umami:umami@db:5432/umami
       DATABASE_TYPE: postgresql
@@ -30,7 +30,7 @@ services:
     restart: always
   minio:
     container_name: minio
-    image: bitnami/minio:latest
+    image: bitnami/minio:2023.3.22
     ports:
       - "9000:9000"
       - "9001:9001"
