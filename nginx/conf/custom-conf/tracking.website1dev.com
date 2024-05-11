@@ -16,6 +16,12 @@ server {
         ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
 
         location / {
+                proxy_set_header Host $host;
+                proxy_set_header X-Client-IP $remote_addr;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Host $host;
+                proxy_set_header X-Forwarded-Proto $scheme;
                 proxy_pass http://umami-server$uri$is_args$args;
         }
 
