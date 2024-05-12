@@ -1,7 +1,7 @@
-minio/data
-self-signed/certs/nginx-selfsigned.crt
-self-signed/private/nginx-selfsigned.key
 vps-setup/ansible/hosts
 umami/db-data
 umami/sql
 secrets
+caddy/config
+caddy/data
+.$schemas.drawio*
