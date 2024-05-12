@@ -30,9 +30,12 @@ services:
     restart: always
   website:
     container_name: website
-    image: website
+    image: ${WEBSITE_CONTAINER_REGISTRY}/${WEBSITE_CONTAINER_URI}
     networks:
       - app-tier
+    environment:
+      - WEBSITE_CONTAINER_REGISTRY=${WEBSITE_CONTAINER_REGISTRY}
+      - WEBSITE_CONTAINER_URI=${WEBSITE_CONTAINER_URI}
     restart: unless-stopped
   caddy:
     container_name: caddy

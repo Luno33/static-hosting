@@ -1,0 +1,9 @@
+:80 {
+	root * /srv
+	file_server
+}
+
+:443 {
+	root * /srv
+	file_server
+}
