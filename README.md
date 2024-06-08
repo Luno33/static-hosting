@@ -68,9 +68,6 @@ export VPS_ADDRESS=***.***.***.*** # the address of your VPS
         # Authenticate to the external container registry
         docker login $WEBSITE_CONTAINER_REGISTRY
 
-        # Copy the Caddyfile in your Static Website exported from NextJS
-        cp ./website/nextjs/Caddyfile $WEBSITE_PROJECT_PATH/Caddyfile
-
         # Build the image in your NextJS project
         docker build -t $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI -f ./website/nextjs/Dockerfile $WEBSITE_PROJECT_PATH
         # - example: docker build -t registry.gitlab.com/username1/website1/website:v1.0.0 -f ./website/nextjs/Dockerfile /Users/john/website1
@@ -104,9 +101,6 @@ export VPS_ADDRESS=***.***.***.*** # the address of your VPS
 
         # Authenticate to the external container registry
         docker login $WEBSITE_CONTAINER_REGISTRY
-
-        # Copy the Caddyfile in your Static Website exported from NextJS
-        cp ./website/nextjs/Caddyfile $WEBSITE_PROJECT_PATH/Caddyfile
 
         # Build the image in your NextJS project
         docker build -t $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI -f ./website/nextjs/Dockerfile $WEBSITE_PROJECT_PATH
