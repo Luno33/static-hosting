@@ -1,4 +1,4 @@
-{$SITE_ADDRESS}, www.{$SITE_ADDRESS} {
+{$DOMAIN}, www.{$DOMAIN} {
   reverse_proxy website {
     header_up Host {http.request.host}
     header_up X-Real-IP {http.request.remote.host}
@@ -7,7 +7,7 @@
   }
 }
 
-tracking.{$SITE_ADDRESS}, www.tracking.{$SITE_ADDRESS} {
+tracking.{$DOMAIN}, www.tracking.{$DOMAIN} {
   reverse_proxy http://umami:3000 {
     header_up Host {http.request.host}
     header_up X-Real-IP {http.request.remote.host}

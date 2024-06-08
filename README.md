@@ -33,7 +33,7 @@ To switch easily from one environment to the other we'll use to `.env` files:
 `./secrets/.env.qa`:
 
 ```bash
-export SITE_ADDRESS=localhost # For exposing the website on localhost
+export DOMAIN=localhost # For exposing the website on localhost
 export UMAMI_HASH_SALT=************* # Random string useful for umami
 export POSTGRES_USER=************* # New username for umami database
 export POSTGRES_PASSWORD=************* # The password for that new user
@@ -45,35 +45,46 @@ export WEBSITE_PROJECT_PATH=/full/path/to/your/website/project/root
 `./secrets/.env.prod`:
 
 ```bash
-export SITE_ADDRESS=example.com # The domain that you bought and want to configure
+export DOMAIN=example.com # The domain that you bought and want to configure
 export UMAMI_HASH_SALT=************* # Random string useful for umami
 export POSTGRES_USER=************* # New username for umami database
 export POSTGRES_PASSWORD=************* # The password for that new user
-export VPS_ADDRESS=***.***.***.*** # the address of your VPS
 export REMOTE_WORKING_FOLDER=/path/to/your/vps/working/folder # the root working folder on your VPS
 export WEBSITE_CONTAINER_REGISTRY=************* # The container registry url as explained in the previous chapter
 export WEBSITE_CONTAINER_URI=container-name:container-version # example: john/website:latest
 export WEBSITE_PROJECT_PATH=/full/path/to/your/website/project/root
+export VPS_ADDRESS=***.***.***.*** # the address of your VPS
 ```
 
 ### Set up on your local machine
 
-1. Install on your machine docker
-  1. Follow the instructions here: https://docs.docker.com/get-docker/
-2. Build your static website in a small Caddy container. 
+1. Install docker on your machine (https://docs.docker.com/get-docker/)
+2. Build your static website in a small Caddy container:
     - Build your Nextjs website and then run here
         ```bash
+        # Load the environment variables
         source ./secrets/.env.qa
+
+        # Authenticate to the external container registry
         docker login $WEBSITE_CONTAINER_REGISTRY
+
+        # Copy the Caddyfile in your Static Website exported from NextJS
         cp ./website/nextjs/Caddyfile $WEBSITE_PROJECT_PATH/Caddyfile
-        # example: docker build -t registry.gitlab.com/username1/website1/website:v1.0.0 -f ./website/nextjs/Dockerfile /Users/john/website1
+
+        # Build the image in your NextJS project
         docker build -t $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI -f ./website/nextjs/Dockerfile $WEBSITE_PROJECT_PATH
-        # example: docker push registry.gitlab.com/username1/website1:v1.0.0
-        docker push $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI 
+        # - example: docker build -t registry.gitlab.com/username1/website1/website:v1.0.0 -f ./website/nextjs/Dockerfile /Users/john/website1
+
+        # Push the container to the external container registry
+        docker push $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI
+        # - example: docker push registry.gitlab.com/username1/website1:v1.0.0
         ```
-3. Run it
+3. Run it locally
     ```bash
+    # Load the environment variables
     source ./secrets/.env.qa
+
+    # Run the containers passing your environment variables to the superuser user
     sudo -E docker-compose pull && sudo -E docker compose up
     ```
 4. Navigate on https://localhost and https://tracking.localhost to test that everything works
@@ -85,30 +96,45 @@ export WEBSITE_PROJECT_PATH=/full/path/to/your/website/project/root
     1. install on the VPS all the needed dependencies
     2. push to the VPS all the file from this repository that are needed
 3. Get a domain and point it on your VPS IP address
-4. Build your static website in a small Caddy container and push it to a remote container registry
+4. Build your static website in a small Caddy container and push it to a remote container registry:
     - Build your Nextjs website and then run here
         ```bash
+        # Load the environment variables
         source ./secrets/.env.prod
+
+        # Authenticate to the external container registry
         docker login $WEBSITE_CONTAINER_REGISTRY
+
+        # Copy the Caddyfile in your Static Website exported from NextJS
         cp ./website/nextjs/Caddyfile $WEBSITE_PROJECT_PATH/Caddyfile
-        # example: docker build -t registry.gitlab.com/username1/website1/website:v1.0.0 -f ./website/nextjs/Dockerfile /Users/john/website1
+
+        # Build the image in your NextJS project
         docker build -t $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI -f ./website/nextjs/Dockerfile $WEBSITE_PROJECT_PATH
-        # example: docker push registry.gitlab.com/username1/website1:v1.0.0
-        docker push $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI 
+        # - example: docker build -t registry.gitlab.com/username1/website1/website:v1.0.0 -f ./website/nextjs/Dockerfile /Users/john/website1
+
+        # Push the container to the external container registry
+        docker push $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI
+        # - example: docker push registry.gitlab.com/username1/website1:v1.0.0
         ```
 5. Copy the necessary files on the server
     ```bash
+    # Load the environment variables
     source ./secrets/.env.prod
+
+    # Push project files on the server
     rsync -chavzP --stats \
-    --include='caddy/Caddyfile' \
-    --include='secrets/***' \
-    --include='docker-compose.yml' \
-    --exclude='*' \
-    ./ $VPS_ADDRESS:$REMOTE_WORKING_FOLDER
+      --include='caddy/Caddyfile' \
+      --include='secrets/***' \
+      --include='docker-compose.yml' \
+      --exclude='*' \
+      ./ $VPS_ADDRESS:$REMOTE_WORKING_FOLDER
     ```
 5. SSH into the server and run the docker compose
     ```bash
+    # Load the environment variables
     source ./secrets/.env.prod
+
+    # Run the containers passing your environment variables to the superuser user
     sudo -E docker-compose pull && sudo -E docker compose up
     ```
 
@@ -119,14 +145,20 @@ export WEBSITE_PROJECT_PATH=/full/path/to/your/website/project/root
 Locally
 
 ```bash
+# Load the environment variables
 source ./secrets/.env.qa
+
+# Run the containers passing your environment variables to the superuser user
 sudo -E docker compose up
 ```
 
 Remotely
 
 ```bash
+# Load the environment variables
 source ./secrets/.env.prod
+
+# Run the containers passing your environment variables to the superuser user
 sudo -E docker compose up
 ```
 
@@ -135,39 +167,57 @@ sudo -E docker compose up
 Locally
 
 ```bash
+# Load the environment variables
 source ./secrets/.env.qa
+
+# Build the image in your NextJS project
 docker build -t $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI -f ./website/nextjs/Dockerfile $WEBSITE_PROJECT_PATH
+
+# Run the containers passing your environment variables to the superuser user
 sudo -E docker compose up
 ```
 
 Remotely
 
 ```bash
+# Load the environment variables
 source ./secrets/.env.prod
+
+# Build the image in your NextJS project
 docker build -t $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI -f ./website/nextjs/Dockerfile $WEBSITE_PROJECT_PATH
-docker push $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI 
-# send the new secrets to the machine
+
+# Push the container to the external container registry
+docker push $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI
+
+# Push project files on the server
 rsync -chavzP --stats \
   --include='caddy/Caddyfile' \
   --include='secrets/***' \
   --include='docker-compose.yml' \
   --exclude='*' \
   ./ $VPS_ADDRESS:$REMOTE_WORKING_FOLDER
-# ssh into the machine
+
+# ssh into the server and run the containers passing your environment variables to the superuser user
 docker-compose pull && docker-compose up -d
 ```
 
 ### Download a folder for backup purposes
 
 ```bash
+# Load the environment variables
 source ./secrets/.env.prod
+
+# Download recursively a folder on the server into your machine
 rsync -chavzP --stats $VPS_ADDRESS:/remote/folder/path /local/folder/path
 ```
 
 ### Push on the server new configurations
 
 ```bash
+# Load the environment variables
 source ./secrets/.env.prod
+
+# Push project files on the server
 rsync -chavzP --stats \
   --include='caddy/Caddyfile' \
   --include='secrets/***' \

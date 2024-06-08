@@ -51,7 +51,7 @@ services:
       - ./caddy/data:/data
       - ./caddy/config:/config
     environment:
-      - SITE_ADDRESS=${SITE_ADDRESS}
+      - DOMAIN=${DOMAIN}
     networks:
       - app-tier
     restart: unless-stopped
