@@ -40,6 +40,7 @@ export POSTGRES_PASSWORD=************* # The password for that new user
 export WEBSITE_CONTAINER_REGISTRY=************* # The container registry url as explained in the previous chapter
 export WEBSITE_CONTAINER_URI=container-name:container-version # example: john/website:latest
 export WEBSITE_PROJECT_PATH=/full/path/to/your/website/project/root
+export BUILD_PLATFORM=linux/arm64 # or linux/amd64, depending on the platform architecture where the image will run
 ```
 
 `./secrets/.env.prod`:
@@ -54,6 +55,7 @@ export WEBSITE_CONTAINER_REGISTRY=************* # The container registry url as 
 export WEBSITE_CONTAINER_URI=container-name:container-version # example: john/website:latest
 export WEBSITE_PROJECT_PATH=/full/path/to/your/website/project/root
 export VPS_ADDRESS=***.***.***.*** # the address of your VPS
+export BUILD_PLATFORM=linux/amd64 # or linux/arm64, depending on the platform architecture where the image will run
 ```
 
 ### Set up on your local machine
@@ -178,7 +180,7 @@ Remotely (PROD)
 source ./secrets/.env.prod
 
 # Build the image in your NextJS project
-docker build -t $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI -f ./website/nextjs/Dockerfile $WEBSITE_PROJECT_PATH
+docker build -t $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI-$BUILD_PLATFORM -f ./website/nextjs/Dockerfile --platform $BUILD_PLATFORM $WEBSITE_PROJECT_PATH
 
 # Push the container to the external container registry
 docker push $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI
