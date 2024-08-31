@@ -24,8 +24,11 @@ registry-build-prod:
 	sudo -E docker build -t $$WEBSITE_CONTAINER_FULL_URI \
 	-f ./website/nextjs/Dockerfile --platform $$BUILD_PLATFORM $$WEBSITE_PROJECT_PATH
 
-registry-push:
-	@source ./secrets/.env.prod && docker push $$WEBSITE_CONTAINER_FULL_URI
+registry-push-qa:
+	@source ./secrets/.env.qa && docker push $$WEBSITE_CONTAINER_FULL_URI
+
+registry-push-prod:
+	@source ./secrets/.env.qa && docker push $$WEBSITE_CONTAINER_FULL_URI
 
 update-server:
 	@source ./secrets/.env.prod && rsync -chavzP --stats --include='caddy/' --include='caddy/Caddyfile' --include='secrets/***' --include='docker-compose.yml' --include='Makefile' --exclude='*' ./ $$VPS_USER@$$VPS_ADDRESS:$$REMOTE_WORKING_FOLDER
