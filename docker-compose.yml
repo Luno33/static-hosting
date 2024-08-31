@@ -8,15 +8,16 @@ services:
     container_name: umami
     image: ghcr.io/umami-software/umami:postgresql-v2.11.3
     environment:
-      DATABASE_URL: postgresql://umami:umami@db:5432/umami
+      DATABASE_URL: postgresql://umami:umami@umami-db:5432/umami
       DATABASE_TYPE: postgresql
       HASH_SALT: ${UMAMI_HASH_SALT}
     networks:
       - app-tier
     depends_on:
-      - db
+      - umami-db
     restart: always
-  db:
+  umami-db:
+    container_name: umami-db
     image: postgres:12-alpine
     environment:
       POSTGRES_DB: umami
@@ -25,17 +26,17 @@ services:
     volumes:
       - ./umami/sql/schema.postgresql.sql:/docker-entrypoint-initdb.d/schema.postgresql.sql:ro
       - ./umami/db-data/umami-db-data:/var/lib/postgresql/data
+      - ./umami/db-dumps:/home/db-dumps
     networks:
       - app-tier
     restart: always
   website:
     container_name: website
-    image: ${WEBSITE_CONTAINER_REGISTRY}/${WEBSITE_CONTAINER_URI}
+    image: ${WEBSITE_CONTAINER_FULL_URI}
     networks:
       - app-tier
     environment:
-      - WEBSITE_CONTAINER_REGISTRY=${WEBSITE_CONTAINER_REGISTRY}
-      - WEBSITE_CONTAINER_URI=${WEBSITE_CONTAINER_URI}
+      - WEBSITE_CONTAINER_FULL_URI=${WEBSITE_CONTAINER_FULL_URI}
     restart: unless-stopped
   caddy:
     container_name: caddy
