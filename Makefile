@@ -20,3 +20,10 @@ enter-server:
 
 exec-caddy:
 	@docker-compose exec -ti caddy /bin/bash
+
+download-db-dump:
+	@mkdir -p ./umami/remote-db-dumps && rsync -chavzP --stats ${VPS_USER}@${VPS_ADDRESS}:${REMOTE_WORKING_FOLDER}/umami/db-dumps ./umami/remote-db-dumps
+
+# To run on server
+dump-umami-db:
+	@source ./secrets/.env.prod && docker compose exec db sh -c 'pg_dump -U $$POSTGRES_USER umami > /home/db-dumps/umami-db-`date +%Y-%m-%d-%H:%M`.sql'
