@@ -38,9 +38,16 @@ export UMAMI_HASH_SALT=************* # Random string useful for umami
 export POSTGRES_USER=************* # New username for umami database
 export POSTGRES_PASSWORD=************* # The password for that new user
 export WEBSITE_CONTAINER_REGISTRY=************* # The container registry url as explained in the previous chapter
-export WEBSITE_CONTAINER_URI=container-name:container-version # example: john/website:latest
-export WEBSITE_PROJECT_PATH=/full/path/to/your/website/project/root
+export WEBSITE_CONTAINER_URI=container-name # example: john/website
+export WEBSITE_CONTAINER_TAG=latest
 export BUILD_PLATFORM=linux/arm64 # or linux/amd64, depending on the platform architecture where the image will run
+export REMOTE_WORKING_FOLDER=/home/marco/app/v2
+export WEBSITE_PROJECT_PATH=/full/path/to/your/website/project/root
+export VPS_ADDRESS=***.***.***.*** # the address of your VPS
+export VPS_USER=******** # user of the VPS
+# Combined Env Var
+export BUILD_PLATFORM_NAME="${BUILD_PLATFORM/\//-}" 
+export WEBSITE_CONTAINER_FULL_URI=$WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI:$WEBSITE_CONTAINER_TAG-$BUILD_PLATFORM_NAME
 ```
 
 `./secrets/.env.prod`:
@@ -52,10 +59,16 @@ export POSTGRES_USER=************* # New username for umami database
 export POSTGRES_PASSWORD=************* # The password for that new user
 export REMOTE_WORKING_FOLDER=/path/to/your/vps/working/folder # the root working folder on your VPS
 export WEBSITE_CONTAINER_REGISTRY=************* # The container registry url as explained in the previous chapter
-export WEBSITE_CONTAINER_URI=container-name:container-version # example: john/website:latest
+export WEBSITE_CONTAINER_URI=container-name # example: john/website
+export WEBSITE_CONTAINER_TAG=latest
+export BUILD_PLATFORM=linux/amd64 # or linux/arm64, depending on the platform architecture where the image will run
+export REMOTE_WORKING_FOLDER=/home/marco/app/v2
 export WEBSITE_PROJECT_PATH=/full/path/to/your/website/project/root
 export VPS_ADDRESS=***.***.***.*** # the address of your VPS
-export BUILD_PLATFORM=linux/amd64 # or linux/arm64, depending on the platform architecture where the image will run
+export VPS_USER=******** # user of the VPS
+# Combined Env Var
+export BUILD_PLATFORM_NAME="${BUILD_PLATFORM/\//-}"
+export WEBSITE_CONTAINER_FULL_URI=$WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI:$WEBSITE_CONTAINER_TAG-$BUILD_PLATFORM_NAME
 ```
 
 ### Set up on your local machine
