@@ -15,12 +15,12 @@ registry-logout:
 	@source ./secrets/.env.prod && docker logout $$WEBSITE_CONTAINER_REGISTRY
 
 registry-build-qa:
-	source ./secrets/.env.qa && \
+	@source ./secrets/.env.qa && \
 	sudo -E docker build -t $$WEBSITE_CONTAINER_FULL_URI \
 	-f ./website/nextjs/Dockerfile --platform $$BUILD_PLATFORM $$WEBSITE_PROJECT_PATH
 
 registry-build-prod:
-	source ./secrets/.env.prod && \
+	@source ./secrets/.env.prod && \
 	sudo -E docker build -t $$WEBSITE_CONTAINER_FULL_URI \
 	-f ./website/nextjs/Dockerfile --platform $$BUILD_PLATFORM $$WEBSITE_PROJECT_PATH
 
@@ -42,7 +42,7 @@ download-db-dump:
 # ----------- Commands to run on the remote server -----------
 
 run-remote:
-	@source ./secrets/.env.prod && docker compose pull && docker compose up --remove-orphans
+	@source ./secrets/.env.prod && docker compose pull && docker compose up -d --remove-orphans
 
 run-db-only: # Useful to restore db dumps
 	@source ./secrets/.env.prod && docker compose pull && docker compose up --no-deps --remove-orphans umami-db
