@@ -134,9 +134,9 @@ export VPS_ADDRESS=***.***.***.*** # the address of your VPS
 
 ## Usage
 
-### Start the local (QA) environment
+### Start the environment
 
-Locally
+Locally (QA)
 
 ```bash
 # Load the environment variables
@@ -146,7 +146,7 @@ source ./secrets/.env.qa
 sudo -E docker compose up
 ```
 
-Remotely
+Remotely (PROD)
 
 ```bash
 # Load the environment variables
@@ -158,7 +158,7 @@ sudo -E docker compose up
 
 ### Deploy a new version of your website
 
-Locally
+Locally (QA)
 
 ```bash
 # Load the environment variables
@@ -171,7 +171,7 @@ docker build -t $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI -f ./website/
 sudo -E docker compose up
 ```
 
-Remotely
+Remotely (PROD)
 
 ```bash
 # Load the environment variables
