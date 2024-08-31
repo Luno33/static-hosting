@@ -1,6 +1,7 @@
 vps-setup/ansible/hosts
 umami/db-data
 umami/sql
+umami/remote-db-dumps
 secrets
 caddy/config
 caddy/data
