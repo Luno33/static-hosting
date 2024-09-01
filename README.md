@@ -30,46 +30,28 @@ The following guide is optimized for static websites built on NextJS. It is very
 
 To switch easily from one environment to the other we'll use to `.env` files:
 
-`./secrets/.env.qa`:
+- `./envs/.env.qa`: In this environment all the containers will be run locally on the development machine. It is meant to be a quick-to-use qa environment.
+- `./envs/.env.preprod`: This should be a VM that simulate the production environment, with the same operating system and configurations.
+- `./envs/.env.prod`: This environment is the actual server
 
-```bash
-export DOMAIN=localhost # For exposing the website on localhost
-export UMAMI_HASH_SALT=************* # Random string useful for umami
-export POSTGRES_USER=************* # New username for umami database
-export POSTGRES_PASSWORD=************* # The password for that new user
-export WEBSITE_CONTAINER_REGISTRY=************* # The container registry url as explained in the previous chapter
-export WEBSITE_CONTAINER_URI=container-name # example: john/website
-export WEBSITE_CONTAINER_TAG=latest
-export BUILD_PLATFORM=linux/arm64 # or linux/amd64, depending on the platform architecture where the image will run
-export REMOTE_WORKING_FOLDER=/home/marco/app/v2
-export WEBSITE_PROJECT_PATH=/full/path/to/your/website/project/root
-export VPS_ADDRESS=***.***.***.*** # the address of your VPS
-export VPS_USER=******** # user of the VPS
-# Combined Env Var
-export BUILD_PLATFORM_NAME="${BUILD_PLATFORM/\//-}" 
-export WEBSITE_CONTAINER_FULL_URI=$WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI:$WEBSITE_CONTAINER_TAG-$BUILD_PLATFORM_NAME
-```
+The `.env.X` file should look like this: [./envs/.env.example](./envs/.env.example)
 
-`./secrets/.env.prod`:
+Fields explanation:
 
-```bash
-export DOMAIN=example.com # The domain that you bought and want to configure
-export UMAMI_HASH_SALT=************* # Random string useful for umami
-export POSTGRES_USER=************* # New username for umami database
-export POSTGRES_PASSWORD=************* # The password for that new user
-export REMOTE_WORKING_FOLDER=/path/to/your/vps/working/folder # the root working folder on your VPS
-export WEBSITE_CONTAINER_REGISTRY=************* # The container registry url as explained in the previous chapter
-export WEBSITE_CONTAINER_URI=container-name # example: john/website
-export WEBSITE_CONTAINER_TAG=latest
-export BUILD_PLATFORM=linux/amd64 # or linux/arm64, depending on the platform architecture where the image will run
-export REMOTE_WORKING_FOLDER=/home/marco/app/v2
-export WEBSITE_PROJECT_PATH=/full/path/to/your/website/project/root
-export VPS_ADDRESS=***.***.***.*** # the address of your VPS
-export VPS_USER=******** # user of the VPS
-# Combined Env Var
-export BUILD_PLATFORM_NAME="${BUILD_PLATFORM/\//-}"
-export WEBSITE_CONTAINER_FULL_URI=$WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI:$WEBSITE_CONTAINER_TAG-$BUILD_PLATFORM_NAME
-```
+| Field | Explanation |
+| --- | --- |
+| DOMAIN | Domain used by Caddy. For exposing the website on localhost choose `localhost`, in production use the domain you've bought like `domain.com` |
+| UMAMI_HASH_SALT | Random unique string useful for umami |
+| POSTGRES_USER | New username for umami database |
+| POSTGRES_PASSWORD | The password for that new user |
+| WEBSITE_CONTAINER_REGISTRY | The container registry url. If you are using GitLab it will be `registry.gitlab.com` |
+| WEBSITE_CONTAINER_URI | The container name, in case of GitLab will be `your-username/image-name` |
+| WEBSITE_CONTAINER_TAG | The tag of the container, like `latest`, a [semver](https://semver.org/) version and the specification of the architecture supported by that image |
+| BUILD_PLATFORM | The platform architecture where the container will run. For example for Apple Silicon it is `linux/arm64` and for standard servers is `linux/amd64` |
+| REMOTE_WORKING_FOLDER | In which folder on the server you want to put your scripts and configurations. This folder needs to exist |
+| WEBSITE_PROJECT_PATH | Full path location of your NextJS project, so it will be built using this Dockerfile [./website/nextjs/Dockerfile](./website/nextjs/Dockerfile) |
+| VPS_ADDRESS | The address of the remote machine that will run the containers, could be a local address for the VM or a remote address for the production server |
+| VPS_USER | The user that is configured on the machine located at `VPS_ADDRESS` |
 
 ### Set up on your local machine
 
@@ -77,162 +59,89 @@ export WEBSITE_CONTAINER_FULL_URI=$WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER
 2. Build your static website in a small Caddy container:
     - Build your Nextjs website and then run here
         ```bash
-        # Load the environment variables
-        source ./secrets/.env.qa
-
-        # Authenticate to the external container registry
-        docker login $WEBSITE_CONTAINER_REGISTRY
-
-        # Build the image in your NextJS project
-        docker build -t $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI -f ./website/nextjs/Dockerfile $WEBSITE_PROJECT_PATH
-        # - example: docker build -t registry.gitlab.com/username1/website1/website:v1.0.0 -f ./website/nextjs/Dockerfile /Users/john/website1
-
-        # Push the container to the external container registry
-        docker push $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI
-        # - example: docker push registry.gitlab.com/username1/website1:v1.0.0
+        make registry-login ENV=qa
+        make registry-build ENV=qa
+        make registry-push ENV=qa
         ```
 3. Run it locally
     ```bash
-    # Load the environment variables
-    source ./secrets/.env.qa
-
-    # Run the containers passing your environment variables to the superuser user
-    sudo -E docker-compose pull && sudo -E docker compose up
+    make run-local ENV=qa
     ```
 4. Navigate on https://localhost and https://tracking.localhost to test that everything works
 
 ### Set up on a remote server
 
 1. Rent a VPS on your favorite VPS provider. Good examples: https://webdock.io/en, https://www.vultr.com/, https://www.linode.com/
-2. Follow the readme in the [vps-setup folder](../vps-setup/README.md) to 
-    1. install on the VPS all the needed dependencies
-    2. push to the VPS all the file from this repository that are needed
+2. Follow the readme in the [vps-setup folder](../vps-setup/README.md) to install on the VPS all the needed dependencies
 3. Get a domain and point it on your VPS IP address
 4. Build your static website in a small Caddy container and push it to a remote container registry:
     - Build your Nextjs website and then run here
         ```bash
-        # Load the environment variables
-        source ./secrets/.env.prod
-
-        # Authenticate to the external container registry
-        docker login $WEBSITE_CONTAINER_REGISTRY
-
-        # Build the image in your NextJS project
-        docker build -t $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI -f ./website/nextjs/Dockerfile $WEBSITE_PROJECT_PATH
-        # - example: docker build -t registry.gitlab.com/username1/website1/website:v1.0.0 -f ./website/nextjs/Dockerfile /Users/john/website1
-
-        # Push the container to the external container registry
-        docker push $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI
-        # - example: docker push registry.gitlab.com/username1/website1:v1.0.0
+        make registry-login ENV=prod
+        make registry-build ENV=prod
+        make registry-push ENV=prod
         ```
 5. Copy the necessary files on the server
     ```bash
-    # Load the environment variables
-    source ./secrets/.env.prod
-
-    # Push project files on the server
-    rsync -chavzP --stats \
-      --include='caddy/Caddyfile' \
-      --include='secrets/***' \
-      --include='docker-compose.yml' \
-      --exclude='*' \
-      ./ $VPS_ADDRESS:$REMOTE_WORKING_FOLDER
+    make update-server ENV=prod
     ```
-5. SSH into the server and run the docker compose
+6. SSH into the server and run the docker compose
     ```bash
-    # Load the environment variables
-    source ./secrets/.env.prod
+    make enter-server ENV=prod
 
-    # Run the containers passing your environment variables to the superuser user
-    sudo -E docker-compose pull && sudo -E docker compose up
+    # From inside the server
+    make registry-login ENV=prod
+    make run-remote ENV=prod
     ```
 
 ## Usage
 
-### Start the environment
-
-Locally (QA)
+### Start the containers
 
 ```bash
-# Load the environment variables
-source ./secrets/.env.qa
+# With docker compose running on the pc
+make run-local ENV=qa
 
-# Run the containers passing your environment variables to the superuser user
-sudo -E docker compose up
-```
+# With docker compose running on the vm
+make run-remote ENV=preprod
 
-Remotely (PROD)
-
-```bash
-# Load the environment variables
-source ./secrets/.env.prod
-
-# Run the containers passing your environment variables to the superuser user
-sudo -E docker compose up
+# With docker compose running on the server
+make run-remote ENV=prod
 ```
 
 ### Deploy a new version of your website
 
-Locally (QA)
+> ! Remember to push to the registry that you will use and to build the image with the right platform
 
 ```bash
-# Load the environment variables
-source ./secrets/.env.qa
-
-# Build the image in your NextJS project
-docker build -t $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI -f ./website/nextjs/Dockerfile $WEBSITE_PROJECT_PATH
-
-# Run the containers passing your environment variables to the superuser user
-sudo -E docker compose up
+# Adjust the environment as needed
+make registry-login ENV=prod
+make registry-build ENV=prod
+make registry-push ENV=prod
 ```
 
-Remotely (PROD)
+Then update the files on the server as needed
 
 ```bash
-# Load the environment variables
-source ./secrets/.env.prod
-
-# Build the image in your NextJS project
-docker build -t $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI-$BUILD_PLATFORM -f ./website/nextjs/Dockerfile --platform $BUILD_PLATFORM $WEBSITE_PROJECT_PATH
-
-# Push the container to the external container registry
-docker push $WEBSITE_CONTAINER_REGISTRY/$WEBSITE_CONTAINER_URI
-
-# Push project files on the server
-rsync -chavzP --stats \
-  --include='caddy/Caddyfile' \
-  --include='secrets/***' \
-  --include='docker-compose.yml' \
-  --exclude='*' \
-  ./ $VPS_ADDRESS:$REMOTE_WORKING_FOLDER
-
-# ssh into the server and run the containers passing your environment variables to the superuser user
-docker-compose pull && docker-compose up -d
+make update-server ENV=prod
 ```
+
+And lastly start the containers as above.
 
 ### Download a folder for backup purposes
 
 ```bash
 # Load the environment variables
-source ./secrets/.env.prod
+source ./envs/.env.prod
 
 # Download recursively a folder on the server into your machine
 rsync -chavzP --stats $VPS_ADDRESS:/remote/folder/path /local/folder/path
 ```
 
-### Push on the server new configurations
+### Push on the server new configurations and files
 
 ```bash
-# Load the environment variables
-source ./secrets/.env.prod
-
-# Push project files on the server
-rsync -chavzP --stats \
-  --include='caddy/Caddyfile' \
-  --include='secrets/***' \
-  --include='docker-compose.yml' \
-  --exclude='*' \
-  ./ $VPS_ADDRESS:$REMOTE_WORKING_FOLDER
+make update-server ENV=prod
 ```
 
 ## Notes
