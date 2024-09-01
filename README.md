@@ -40,6 +40,7 @@ Fields explanation:
 
 | Field | Explanation |
 | --- | --- |
+| ENV | The environment, for example `qa`, `preprod` and `prod` |
 | DOMAIN | Domain used by Caddy. For exposing the website on localhost choose `localhost`, in production use the domain you've bought like `domain.com` |
 | UMAMI_HASH_SALT | Random unique string useful for umami |
 | POSTGRES_USER | New username for umami database |
@@ -68,6 +69,36 @@ Fields explanation:
     make run-local ENV=qa
     ```
 4. Navigate on https://localhost and https://tracking.localhost to test that everything works
+
+### Set up on a VM
+
+1. Set up your VM. If you want to use QEMU, here you can find help: [./readme-assets/qemu.md](./readme-assets/qemu.md)
+2. Follow the readme in the [vps-setup folder](../vps-setup/README.md) to install on the VM all the needed dependencies
+3. Build your static website in a small Caddy container:
+    - Build your Nextjs website and then run here
+        ```bash
+        make registry-login ENV=preprod
+        make registry-build ENV=preprod
+        make registry-push ENV=preprod
+        ```
+4. Copy the necessary files on the VM
+    ```bash
+    make update-server ENV=preprod
+    ```
+6. SSH into the server and run the docker compose
+    ```bash
+    make enter-server ENV=preprod
+
+    # From inside the server
+    make registry-login ENV=preprod
+    make run-remote ENV=preprod
+    ```
+7. To visit the result, use an SSH tunnel to map your local ports to the VM ones
+    ```bash
+    source ./envs/.env.preprod
+    ssh -L 8080:localhost:80 -L 8443:localhost:443 $VPS_USER@$VPS_ADDRESS
+    ```
+8. Visit https://localhost:8443 
 
 ### Set up on a remote server
 
