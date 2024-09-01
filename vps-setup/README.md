@@ -2,11 +2,11 @@
 
 ## Prerequisites
 
-- Set the env var of the user you login with in the VPS
+Set the env var of the user you login with in the VPS
   
-  ```
-  export LOGIN_USER=************
-  ```
+```
+export LOGIN_USER=************
+```
 
 Create a file named `./ansible/hosts` with this structure
   
