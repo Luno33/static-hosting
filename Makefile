@@ -6,10 +6,10 @@ ENV_FILE := ./envs/.env.$(ENV)
 # ----------- Commands to run on the development machine -----------
 
 run-local:
-	@source $(ENV_FILE) && sudo -E docker-compose pull && sudo -E docker-compose up --remove-orphans
+	@source $(ENV_FILE) && sudo -E docker compose pull && sudo -E docker compose up --remove-orphans
 
 stop-local:
-	@source $(ENV_FILE) && docker-compose down
+	@source $(ENV_FILE) && docker compose down
 
 registry-login:
 	@source $(ENV_FILE) && docker login $$WEBSITE_CONTAINER_REGISTRY
@@ -32,7 +32,7 @@ enter-server:
 	@source $(ENV_FILE) && ssh $$VPS_USER@$$VPS_ADDRESS
 
 exec-caddy:
-	@docker-compose exec -ti caddy /bin/bash
+	@source $(ENV_FILE) && docker compose exec -ti caddy sh
 
 download-db-dump:
 	@source $(ENV_FILE) && mkdir -p ./umami/remote-db-dumps && rsync -chavzP --stats $$VPS_USER@$$VPS_ADDRESS:$$REMOTE_WORKING_FOLDER/umami/db-dumps ./umami/remote-db-dumps
