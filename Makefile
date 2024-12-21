@@ -53,3 +53,6 @@ dump-umami-db:
 
 restore-umami-db:
 	@source $(ENV_FILE) && docker compose exec umami-db sh -c 'psql -U $$POSTGRES_USER -d umami -f /home/db-dumps/umami-db-latest.sql'
+
+caddy-logs:
+	@source $(ENV_FILE) && docker logs caddy
