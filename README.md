@@ -110,7 +110,7 @@ make run-remote ENV=prod
 
 ```bash
 # Load the environment variables
-source ./envs/.env.prod
+source /envs/.env.prod
 
 # Download recursively a folder on the server into your machine
 rsync -chavzP --stats $VPS_ADDRESS:/remote/folder/path /local/folder/path
@@ -120,6 +120,18 @@ rsync -chavzP --stats $VPS_ADDRESS:/remote/folder/path /local/folder/path
 
 ```bash
 make update-server ENV=prod
+```
+
+### Load env vars in current shell
+
+Useful for loading them up and then debug freely having all the environmental variables loaded up of the specified environment:
+
+```bash
+./scripts/with-env.sh <env>
+# Example
+# ./scripts/with-env.sh dev
+# ./scripts/with-env.sh qa
+# ./scripts/with-env.sh prod
 ```
 
 ## Notes

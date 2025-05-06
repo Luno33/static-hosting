@@ -24,24 +24,27 @@ update-server:
 	bash ./scripts/with-env.sh $(ENV) ./scripts/update-server.sh
 
 enter-server:
-	bash ./scripts/with-env.sh $(ENV) bash -c 'ssh "$$VPS_USER@$$VPS_ADDRESS"'
+	bash ./scripts/with-env.sh $(ENV) ./scripts/enter-server.sh
 
 exec-caddy:
 	bash ./scripts/with-env.sh $(ENV) sudo -E docker compose exec -ti caddy sh
 
-# download-db-dump: guard-ENV
-# 	@source $(ENV_FILE) && mkdir -p ./umami/remote-db-dumps && rsync -chavzP --stats $$VPS_USER@$$VPS_ADDRESS:$$REMOTE_WORKING_FOLDER/umami/db-dumps ./umami/remote-db-dumps
+download-db-dump:
+	mkdir -p ./umami/remote-db-dumps && bash ./scripts/with-env.sh $(ENV) bash -c 'rsync -chavzP --stats "$$VPS_USER@$$VPS_ADDRESS:$$REMOTE_WORKING_FOLDER/umami/db-dumps" ./umami/remote-db-dumps'
 
 # ----------- Commands to run on the remote server -----------
 
-# stop-remote: guard-ENV
-# 	@source $(ENV_FILE) && docker compose down
+run-remote:
+	bash ./scripts/with-env.sh $(ENV) docker compose up --remove-orphans
 
-# run-db-only: guard-ENV # Useful to restore db dumps
-# 	@source $(ENV_FILE) && docker compose pull && docker compose up --no-deps --remove-orphans umami-db
+stop-remote:
+	bash ./scripts/with-env.sh $(ENV) docker compose down
 
-# dump-umami-db: guard-ENV
-# 	@source $(ENV_FILE) && docker compose exec umami-db sh -c 'pg_dump -U $$POSTGRES_USER umami > /home/db-dumps/umami-db-`date +%Y-%m-%d-%H:%M`.sql'
+run-db-only: # Useful to restore db dumps
+	bash ./scripts/with-env.sh $(ENV) docker compose up --no-deps --remove-orphans umami-db
+
+# dump-umami-db:
+# 	bash ./scripts/with-env.sh $(ENV) docker compose exec umami-db sh -c 'pg_dump -U $$POSTGRES_USER umami > /home/db-dumps/umami-db-`date +%Y-%m-%d-%H:%M`.sql'
 
 # restore-umami-db: guard-ENV
 # 	@source $(ENV_FILE) && docker compose exec umami-db sh -c 'psql -U $$POSTGRES_USER -d umami -f /home/db-dumps/umami-db-latest.sql'
