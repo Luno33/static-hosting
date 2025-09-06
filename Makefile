@@ -30,7 +30,10 @@ exec-caddy:
 	bash ./scripts/with-env.sh $(ENV) sudo -E docker compose exec -ti caddy sh
 
 download-db-dump:
-	mkdir -p ./umami/remote-db-dumps && bash ./scripts/with-env.sh $(ENV) bash -c 'rsync -chavzP --stats "$$VPS_USER@$$VPS_ADDRESS:$$REMOTE_WORKING_FOLDER/umami/db-dumps" ./umami/remote-db-dumps'
+	mkdir -p ./umami/remote-db-dumps && bash ./scripts/with-env.sh $(ENV) bash -c 'rsync -chavzP -e "ssh -p $$VPS_PORT" --stats "$$VPS_USER@$$VPS_ADDRESS:$$REMOTE_WORKING_FOLDER/umami/db-dumps" ./umami/remote-db-dumps'
+
+upload-db-dump:
+	bash ./scripts/with-env.sh $(ENV) rsync -chavzP --stats -e "ssh -p $$VPS_PORT" 'umami/remote-db-dumps/db-dumps/umami-db-latest.sql' "$$VPS_USER@$$VPS_ADDRESS:$$REMOTE_WORKING_FOLDER/restore-db-dump/"
 
 # ----------- Commands to run on the remote server -----------
 
@@ -43,11 +46,11 @@ stop-remote:
 run-db-only: # Useful to restore db dumps
 	bash ./scripts/with-env.sh $(ENV) docker compose up --no-deps --remove-orphans umami-db
 
-# dump-umami-db:
-# 	bash ./scripts/with-env.sh $(ENV) docker compose exec umami-db sh -c 'pg_dump -U $$POSTGRES_USER umami > /home/db-dumps/umami-db-`date +%Y-%m-%d-%H:%M`.sql'
+dump-umami-db:
+	bash ./scripts/with-env.sh $(ENV) docker compose exec umami-db sh -c 'pg_dump -U $$POSTGRES_USER umami > /home/db-dumps/umami-db-`date +%Y-%m-%d-%H:%M`.sql'
 
-# restore-umami-db: guard-ENV
-# 	@source $(ENV_FILE) && docker compose exec umami-db sh -c 'psql -U $$POSTGRES_USER -d umami -f /home/db-dumps/umami-db-latest.sql'
+restore-umami-db:
+	bash ./scripts/with-env.sh $(ENV) docker compose exec umami-db sh -c 'psql -U $$POSTGRES_USER -d umami -f /home/db-dumps/umami-db-latest.sql'
 
-# caddy-logs: guard-ENV
-# 	@source $(ENV_FILE) && docker logs caddy
+caddy-logs:
+	bash ./scripts/with-env.sh $(ENV) docker logs caddy

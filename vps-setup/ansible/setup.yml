@@ -18,3 +18,17 @@
           - curl
         state: present
         update_cache: yes
+
+    - name: Create /app directory
+      file:
+        path: /app
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: '0755'
+    
+    - name: Ensure SSH key is present for {{ ansible_user }}
+      authorized_key:
+        user: "{{ ansible_user }}"
+        state: present
+        key: "{{ lookup('file', lookup('env', 'SSH_KEY_PATH')) }}"

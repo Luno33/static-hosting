@@ -7,7 +7,13 @@ log() {
 
 log "Deploying to $ENV..."
 
-ssh "$VPS_USER@$VPS_ADDRESS" bash -s <<EOF
+SSH_CMD="ssh -p $VPS_PORT"
+if [[ -n "$SSH_KEY_PATH" ]]; then
+  log "Uses specified key in SSH_KEY_PATH env var"
+  SSH_CMD="$SSH_CMD -i $SSH_KEY_PATH"
+fi
+
+$SSH_CMD "$VPS_USER@$VPS_ADDRESS" -p $VPS_PORT bash -s <<EOF
   set -e
 
   log() {
