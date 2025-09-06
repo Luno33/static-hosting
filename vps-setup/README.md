@@ -4,8 +4,13 @@
 
 Set the env var of the user you login with in the VPS
   
-```
+```bash
+# The user you login with in the VPS
 export LOGIN_USER=************
+
+# The absolute path to your public key to set in the authorized_key
+# for example: /home/marco/.ssh/id_rsa.pub
+export SSH_KEY_PATH=<PATH_TO_SSH_KEY>
 ```
 
 Create a file named `./ansible/hosts` with this structure

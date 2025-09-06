@@ -4,6 +4,14 @@ umami/sql
 umami/remote-db-dumps
 envs/*
 !envs/.env.example
+.deploy-assets/*
+.deploy-assets/.image-tags/*
+.deploy-assets/.image-tars/*
+!.deploy-assets/.gitkeep
+!.deploy-assets/.image-tags/
+!.deploy-assets/.image-tars/
+!.deploy-assets/.image-tags/.gitkeep
+!.deploy-assets/.image-tars/.gitkeep
 caddy/config
 caddy/data
 .$schemas.drawio*

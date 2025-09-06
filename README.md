@@ -15,14 +15,15 @@ Since Webdock gives by default Ubuntu machines, this repo is optimized for Ubunt
 
 ### Architecture
 
-![architecture](./readme-assets/schemas/architecture.png)
+![architecture](./readme-assets/schemas/architecture.drawio.png)
+
+### Build and Deploy Process Sequence Diagram
+
+![Build and deploy sequence diagram](./readme-assets/schemas/build-and-deploy.drawio.png)
 
 ## Prerequisites
 
-This project needs an external Container Registry. Here are the GitLab instructrions as they have a generous free container registry, but you can use the one you prefer.
-- Create a repository on GitLab for the website you want to host
-- You'll get a Container Registry for that repository in the form of registry.gitlab.com/`YOUR_USERNAME`/`YOUR_REPOSITORY_NAME`. Example: `registry.gitlab.com/username1/website1`
-- You'll store this url in the variable `CONTAINER_REGISTRY` of the next chapter below
+Install docker on your development machine (https://docs.docker.com/get-docker/)
 
 ## Getting started
 
@@ -30,8 +31,8 @@ The following guide is optimized for static websites built on NextJS. It is very
 
 To switch easily from one environment to the other we'll use to `.env` files:
 
-- `./envs/.env.qa`: In this environment all the containers will be run locally on the development machine. It is meant to be a quick-to-use qa environment.
-- `./envs/.env.preprod`: This should be a VM that simulate the production environment, with the same operating system and configurations.
+- `./envs/.env.dev`: In this environment all the containers will be run locally on the development machine. It is meant to be a quick-to-use qa environment.
+- `./envs/.env.qa`: This should be a VM that simulate the production environment, with the same operating system and configurations.
 - `./envs/.env.prod`: This environment is the actual server
 
 The `.env.X` file should look like this: [./envs/.env.example](./envs/.env.example)
@@ -40,140 +41,78 @@ Fields explanation:
 
 | Field | Explanation |
 | --- | --- |
-| ENV | The environment, for example `qa`, `preprod` and `prod` |
+| ENV | The environment, for example `dev`, `qa` and `prod` |
 | DOMAIN | Domain used by Caddy. For exposing the website on localhost choose `localhost`, in production use the domain you've bought like `domain.com` |
 | UMAMI_HASH_SALT | Random unique string useful for umami |
 | POSTGRES_USER | New username for umami database |
 | POSTGRES_PASSWORD | The password for that new user |
-| WEBSITE_CONTAINER_REGISTRY | The container registry url. If you are using GitLab it will be `registry.gitlab.com` |
-| WEBSITE_CONTAINER_URI | The container name, in case of GitLab will be `your-username/image-name` |
-| WEBSITE_CONTAINER_TAG | The tag of the container, like `latest`, a [semver](https://semver.org/) version and the specification of the architecture supported by that image |
 | BUILD_PLATFORM | The platform architecture where the container will run. For example for Apple Silicon it is `linux/arm64` and for standard servers is `linux/amd64` |
-| REMOTE_WORKING_FOLDER | In which folder on the server you want to put your scripts and configurations. This folder needs to exist |
+| REMOTE_WORKING_FOLDER | In which folder on the server you want to put your scripts and configurations. This folder needs to exist. It will not be used in the `dev` local environment. |
 | WEBSITE_PROJECT_PATH | Full path location of your NextJS project, so it will be built using this Dockerfile [./website/nextjs/Dockerfile](./website/nextjs/Dockerfile) |
 | VPS_ADDRESS | The address of the remote machine that will run the containers, could be a local address for the VM or a remote address for the production server |
+| VPS_PORT | The port on the server that accepts SSH connections |
 | VPS_USER | The user that is configured on the machine located at `VPS_ADDRESS` |
+| SSH_KEY_PATH | (Optional) is the absolute path for the SSH key to use to access the VM or the remote VPS |
 
-### Set up on your local machine
+Environmental Variables needed by the NextJS frontend will be placed in the root directory of `WEBSITE_PROJECT_PATH` and will be called `.env-build-dev`, `.env-build-qa` and `.env-build-prod`. Inside there will be the variables like:
 
-1. Install docker on your machine (https://docs.docker.com/get-docker/)
-2. Build your static website in a small Caddy container:
+```bash
+NEXT_PUBLIC_UMAMI_SCRIPT_URL=https://tracking.localhost/script.js
+NEXT_PUBLIC_UMAMI_ID=********-****-****-****-************
+```
+
+When you'll configure Umami it'll be helpful for you to set these:
+
+| Field | Explanation |
+| --- | --- |
+| NEXT_PUBLIC_UMAMI_SCRIPT_URL | The URL from which your Umami service will expose the `script.js` file. It is `<PROTOCOL>://tracking.<DOMAIN>:<PORT>/script.js`. The rounte `tracking.<DOMAIN>:<PORT>` is defined in the file [./caddy/Caddyfile](./caddy/Caddyfile) |
+| NEXT_PUBLIC_UMAMI_ID | This is an ID that Umami gives you to identify the websites when you create a new website configuration [umami docs](https://umami.is/docs/collect-data) |
+
+The files `.env-build-*` will be copied inside the Container Image as a `.env` file. The logic for this operation is in [./website/nextjs/Dockerfile](./website/nextjs/Dockerfile).
+
+### Set up on your local machine (Dev environment)
+ 
+1. Build your static website in a small Caddy container:
     - Build your Nextjs website and then run here
         ```bash
-        make registry-login ENV=qa
-        make registry-build ENV=qa
-        make registry-push ENV=qa
+        make build-and-run ENV=dev
         ```
-3. Run it locally
-    ```bash
-    make run-local ENV=qa
-    ```
-4. Navigate on https://localhost and https://tracking.localhost to test that everything works
+2. Navigate on https://localhost and https://tracking.localhost to test that everything works. You can find it [here](https://umami.is/docs/login) the default password for umami.
 
-### Set up on a VM
+If it is the first time you run it, [set up the website on umami](https://umami.is/docs/add-a-website), [take the Website ID](https://umami.is/docs/collect-data) and set it in the `NEXT_PUBLIC_UMAMI_ID` field in a file called `.env-build-dev` in the root of your NextJS project.
+
+### Set up on a VM (Optional QA environment)
 
 1. Set up your VM. If you want to use QEMU, here you can find help: [./readme-assets/qemu.md](./readme-assets/qemu.md)
-2. Follow the readme in the [vps-setup folder](../vps-setup/README.md) to install on the VM all the needed dependencies
+2. Follow the readme in the [vps-setup folder](./vps-setup/README.md) to install on the VM all the needed dependencies
 3. Build your static website in a small Caddy container:
     - Build your Nextjs website and then run here
         ```bash
-        make registry-login ENV=preprod
-        make registry-build ENV=preprod
-        make registry-push ENV=preprod
+        make build-and-deploy ENV=qa
         ```
-4. Copy the necessary files on the VM
+4. To visit the result, use an SSH tunnel to map your local ports to the VM ones
     ```bash
-    make update-server ENV=preprod
+    source ./envs/.env.qa
+    ssh -p $VPS_PORT -L 8080:localhost:80 -L 8443:localhost:443 $VPS_USER@$VPS_ADDRESS
     ```
-6. SSH into the server and run the docker compose
-    ```bash
-    make enter-server ENV=preprod
+5. Visit https://localhost:8443
 
-    # From inside the server
-    make registry-login ENV=preprod
-    make run-remote ENV=preprod
-    ```
-7. To visit the result, use an SSH tunnel to map your local ports to the VM ones
-    ```bash
-    source ./envs/.env.preprod
-    ssh -L 8080:localhost:80 -L 8443:localhost:443 $VPS_USER@$VPS_ADDRESS
-    ```
-8. Visit https://localhost:8443 
+> If you'll have certificate errors in the website when it tries to contact umami's script, open it in the browser and trust the local certificate.
 
-### Set up on a remote server
+### Set up on a remote server (Prod environment)
 
 1. Rent a VPS on your favorite VPS provider. Good examples: https://webdock.io/en, https://www.vultr.com/, https://www.linode.com/
-2. Follow the readme in the [vps-setup folder](../vps-setup/README.md) to install on the VPS all the needed dependencies
+2. Follow the readme in the [vps-setup folder](./vps-setup/README.md) to install on the VPS all the needed dependencies
 3. Get a domain and point it on your VPS IP address
 4. Build your static website in a small Caddy container and push it to a remote container registry:
     - Build your Nextjs website and then run here
         ```bash
-        make registry-login ENV=prod
-        make registry-build ENV=prod
-        make registry-push ENV=prod
+        make build-and-deploy ENV=prod
         ```
-5. Copy the necessary files on the server
-    ```bash
-    make update-server ENV=prod
-    ```
-6. SSH into the server and run the docker compose
-    ```bash
-    make enter-server ENV=prod
 
-    # From inside the server
-    make registry-login ENV=prod
-    make run-remote ENV=prod
-    ```
+## Useful commands
 
-## Usage
-
-### Start the containers
-
-```bash
-# With docker compose running on the pc
-make run-local ENV=qa
-
-# With docker compose running on the vm
-make run-remote ENV=preprod
-
-# With docker compose running on the server
-make run-remote ENV=prod
-```
-
-### Deploy a new version of your website
-
-> ! Remember to push to the registry that you will use and to build the image with the right platform
-
-```bash
-# Adjust the environment as needed
-make registry-login ENV=prod
-make registry-build ENV=prod
-make registry-push ENV=prod
-```
-
-Then update the files on the server as needed
-
-```bash
-make update-server ENV=prod
-```
-
-And lastly start the containers as above.
-
-### Download a folder for backup purposes
-
-```bash
-# Load the environment variables
-source ./envs/.env.prod
-
-# Download recursively a folder on the server into your machine
-rsync -chavzP --stats $VPS_ADDRESS:/remote/folder/path /local/folder/path
-```
-
-### Push on the server new configurations and files
-
-```bash
-make update-server ENV=prod
-```
+Read about useful commands [here](./docs/useful-commands.md)
 
 ## Notes
 
