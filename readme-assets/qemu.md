@@ -55,7 +55,7 @@ qemu-system-x86_64 \
 qemu-system-x86_64 \
   -cpu qemu64 \
   -m 8G \
-  -drive file=/media/marco/storage/VMs/ubuntu-24.04.3-live-server-amd64.qcow2,format=qcow2 \
+  -drive file=$HOME/VMs/ubuntu-24.04.3-live-server-amd64.qcow2,format=qcow2 \
   -cdrom $HOME/Downloads/ubuntu-24.04.3-live-server-amd64.iso \
   -boot c \
   -vga virtio \
@@ -103,7 +103,7 @@ sudo qemu-system-x86_64 \
 qemu-system-x86_64 \
   -cpu qemu64 \
   -m 8G \
-  -drive file=/media/marco/storage/VMs/ubuntu-24.04.3-live-server-amd64.qcow2,format=qcow2 \
+  -drive file=$HOME/VMs/ubuntu-24.04.3-live-server-amd64.qcow2,format=qcow2 \
   -boot c \
   -vga virtio \
   -usb -device usb-tablet \
