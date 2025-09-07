@@ -53,7 +53,7 @@ qemu-system-x86_64 \
 
 ```bash
 qemu-system-x86_64 \
-  -cpu qemu64 \
+  -accel kvm -cpu host \
   -m 8G \
   -drive file=$HOME/VMs/ubuntu-24.04.3-live-server-amd64.qcow2,format=qcow2 \
   -cdrom $HOME/Downloads/ubuntu-24.04.3-live-server-amd64.iso \
@@ -101,7 +101,7 @@ sudo qemu-system-x86_64 \
 
 ```bash
 qemu-system-x86_64 \
-  -cpu qemu64 \
+  -accel kvm -cpu host \
   -m 8G \
   -drive file=$HOME/VMs/ubuntu-24.04.3-live-server-amd64.qcow2,format=qcow2 \
   -boot c \
