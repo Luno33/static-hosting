@@ -79,7 +79,7 @@ qemu-system-x86_64 \
 11. Install the OpenSSH server and allow password authentication over SSH
 12. Do not select any snap to install, as we'll use ansible to install everything on the O.S.
 
-### Install other software
+### Start the server
 
 #### On MacOS
 
@@ -119,6 +119,19 @@ IPv4 address for ensX: 10.X.X.X
 
 You can store that address under `VPS_ADDRESS` in `./envs/.env.qa`.
 
+### Configure the hosts file
+
+On `./vps-setup/ansible/hosts` write:
+
+```bash
+[server01]
+127.0.0.1 ansible_port=2222 ansible_ssh_user=<VPS_USER>
+```
+
+We are defining the port 2222 as it is the port we are binding when running qemu for SSH.
+
+We'll have to use `127.0.0.1` as local IP address because QEMU forwards that port to the VM's SSH.
+
 ### How to use it as a target of Ansible to it
 
 We'll need the environmental variable SSH_KEY_PATH, which is described [here](../vps-setup/README.md)
@@ -135,35 +148,22 @@ docker run -it --rm -v ./:/app/ -v "${SSH_KEY_PATH}:${SSH_KEY_PATH}" -e SSH_KEY_
 > export ANSIBLE_HOST_KEY_CHECKING=False
 ```
 
-We are defining the port 2222 as it is the port we are binding when running qemu for SSH.
-
 #### On Linux
 
 ```bash
+# From the ./vps-setup/ansible folder
 sudo docker run -it --network host --rm -v ./:/app/ -v "${SSH_KEY_PATH}:${SSH_KEY_PATH}" -e SSH_KEY_PATH=${SSH_KEY_PATH} alpine/ansible:2.18.6 sh
 > apk add --no-cache sshpass
 > cd app
 > export ANSIBLE_HOST_KEY_CHECKING=False
 ```
 
-We are defining the port 2222 as it is the port we are binding when running qemu for SSH.
+### Verify SSH connection
 
-### Configure the hosts file
-
-On `./vps-setup/ansible/hosts` write:
-
-#### On MacOS
+From inside the previous step container:
 
 ```bash
-[server01]
-<VPS_ADDRESS> ansible_ssh_user=<VPS_USER>
-```
-
-#### On Linux
-
-```bash
-[server01]
-127.0.0.1 ansible_port=2222 ansible_ssh_user=<VPS_USER>
+ssh -p 2222 <your_username>@127.0.0.1
 ```
 
 ### Next Steps
