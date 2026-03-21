@@ -16,7 +16,7 @@ services:
     restart: always
   umami-db:
     container_name: umami-db
-    image: postgres:12-alpine
+    image: docker.io/library/postgres:12-alpine
     environment:
       POSTGRES_DB: umami
       POSTGRES_USER: ${POSTGRES_USER}
@@ -38,7 +38,7 @@ services:
     restart: unless-stopped
   caddy:
     container_name: caddy
-    image: caddy:2.8-alpine
+    image: docker.io/library/caddy:2.8-alpine
     cap_add:
       - NET_ADMIN
     ports:

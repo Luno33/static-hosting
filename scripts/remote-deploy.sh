@@ -33,13 +33,40 @@ $SSH_CMD "$VPS_USER@$VPS_ADDRESS" -p $VPS_PORT bash -s <<EOF
   log "Image: \$WEBSITE_IMAGE"
 
   log "Loading image into local registry..."
-  docker load < .deploy-assets/.image-tars/$ENV.\$WEBSITE_IMAGE.tar.gz
+  podman load < .deploy-assets/.image-tars/$ENV.\$WEBSITE_IMAGE.tar.gz
 
   log "Stopping current containers..."
   WEBSITE_CONTAINER_FULL_URI=\$WEBSITE_IMAGE \
-  docker compose down --remove-orphans
+  podman compose down --remove-orphans
 
   log "Starting new containers..."
   WEBSITE_CONTAINER_FULL_URI=\$WEBSITE_IMAGE \
-  docker compose up -d --remove-orphans
+  podman compose up -d --remove-orphans
+
+  log "Ensuring systemd service is configured..."
+  mkdir -p ~/.config/systemd/user
+
+  cat > ~/.config/systemd/user/podman-compose-app.service << 'SERVICE_EOF'
+[Unit]
+Description=Podman Compose - app
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=__WORKING_DIR__
+
+ExecStart=/usr/bin/make run-remote ENV=__ENV__
+ExecStop=/usr/bin/make stop-remote ENV=__ENV__
+
+[Install]
+WantedBy=default.target
+SERVICE_EOF
+
+  sed -i "s|__WORKING_DIR__|$REMOTE_WORKING_FOLDER|g" ~/.config/systemd/user/podman-compose-app.service
+  sed -i "s|__ENV__|$ENV|g" ~/.config/systemd/user/podman-compose-app.service
+
+  systemctl --user daemon-reload
+  systemctl --user enable podman-compose-app.service
+  log "Systemd service enabled"
 EOF

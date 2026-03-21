@@ -1,7 +1,6 @@
 - hosts: all
   become: true
   roles:
-    - geerlingguy.docker
     - geerlingguy.swap
   tasks:
     - name: Upgrade all packages to latest version
@@ -16,8 +15,23 @@
           - rsync
           - make
           - curl
+          - podman
+          - podman-compose
         state: present
         update_cache: yes
+
+    - name: Allow unprivileged users to bind to port 80+
+      sysctl:
+        name: net.ipv4.ip_unprivileged_port_start
+        value: '80'
+        state: present
+        sysctl_file: /etc/sysctl.d/99-unprivileged-ports.conf
+        reload: yes
+
+    - name: Enable lingering for {{ ansible_user }}
+      command: loginctl enable-linger {{ ansible_user }}
+      args:
+        creates: /var/lib/systemd/linger/{{ ansible_user }}
 
     - name: Create /app directory
       file:
