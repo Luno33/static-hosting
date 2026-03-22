@@ -33,7 +33,7 @@ download-db-dump:
 	mkdir -p ./umami/remote-db-dumps && bash ./scripts/with-env.sh $(ENV) bash -c 'rsync -chavzP -e "ssh -p $$VPS_PORT" --stats "$$VPS_USER@$$VPS_ADDRESS:$$REMOTE_WORKING_FOLDER/umami/db-dumps" ./umami/remote-db-dumps'
 
 upload-db-dump:
-	bash ./scripts/with-env.sh $(ENV) rsync -chavzP --stats -e "ssh -p $$VPS_PORT" 'umami/remote-db-dumps/db-dumps/umami-db-latest.sql' "$$VPS_USER@$$VPS_ADDRESS:$$REMOTE_WORKING_FOLDER/restore-db-dump/"
+	bash ./scripts/with-env.sh $(ENV) bash ./scripts/with-env.sh $(ENV) bash -c 'rsync -chavzP --stats -e "ssh -p $$VPS_PORT" umami/remote-db-dumps/db-dumps/umami-db-restore.sql "$$VPS_USER@$$VPS_ADDRESS:$$REMOTE_WORKING_FOLDER/umami/db-dumps"'
 
 # ----------- Commands to run on the remote server -----------
 
@@ -44,13 +44,13 @@ stop-remote:
 	bash ./scripts/with-env.sh $(ENV) podman compose down
 
 run-db-only: # Useful to restore db dumps
-	bash ./scripts/with-env.sh $(ENV) podman compose up --no-deps --remove-orphans umami-db
+	bash ./scripts/with-env.sh $(ENV) podman compose up -d --no-deps --remove-orphans umami-db
 
 dump-umami-db:
 	bash ./scripts/with-env.sh $(ENV) podman compose exec umami-db sh -c 'pg_dump -U $$POSTGRES_USER umami > /home/db-dumps/umami-db-`date +%Y-%m-%d-%H:%M`.sql'
 
 restore-umami-db:
-	bash ./scripts/with-env.sh $(ENV) podman compose exec umami-db sh -c 'psql -U $$POSTGRES_USER -d umami -f /home/db-dumps/umami-db-latest.sql'
+	bash ./scripts/with-env.sh $(ENV) podman compose exec umami-db sh -c 'psql -U $$POSTGRES_USER -d umami -f /home/db-dumps/umami-db-restore.sql'
 
 caddy-logs:
 	bash ./scripts/with-env.sh $(ENV) podman logs caddy
