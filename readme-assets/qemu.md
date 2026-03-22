@@ -138,38 +138,6 @@ ssh -p 2222 $VPS_USER@$VPS_ADDRESS
 ssh -p 22 $VPS_USER@$VPS_ADDRESS
 ```
 
-### How to use it as a target of Ansible to it
-
-#### On MacOs
-
-Since MacOS does not include sshpass, a way to send ansible commands without installing additional software is to use ansible inside docker
-
-```bash
-docker run -it --rm \
-  -w /app/vps-setup \
-  -v ./envs/.env.qa:/app/envs/.env.qa \
-  -v ./vps-setup/ansible:/app/vps-setup/ansible \
-  -v "${SSH_KEY_PATH}:${SSH_KEY_PATH}" \
-  -v "${SSH_KEY_PATH}.pub:${SSH_KEY_PATH}.pub" \
-  alpine/ansible:2.18.6 sh
-> apk add --no-cache sshpass
-> export ANSIBLE_HOST_KEY_CHECKING=False
-```
-
-#### On Linux
-
-```bash
-sudo -E docker run -it --network host --rm \
-  -w /app/vps-setup \
-  -v ./envs/.env.qa:/app/envs/.env.qa \
-  -v ./vps-setup/ansible:/app/vps-setup/ansible \
-  -v "${SSH_KEY_PATH}:${SSH_KEY_PATH}" \
-  -v "${SSH_KEY_PATH}.pub:${SSH_KEY_PATH}.pub" \
-  alpine/ansible:2.18.6 sh
-> apk add --no-cache sshpass
-> export ANSIBLE_HOST_KEY_CHECKING=False
-```
-
 ### Next Steps
 
 Now you can run the playbooks following the guide at [vps-setup/README.md](../vps-setup/README.md)
