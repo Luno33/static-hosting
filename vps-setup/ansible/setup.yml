@@ -17,6 +17,8 @@
           - curl
           - podman
           - podman-compose
+          - ufw
+          - fail2ban
         state: present
         update_cache: yes
 
@@ -46,3 +48,84 @@
         user: "{{ ansible_user }}"
         state: present
         key: "{{ lookup('file', lookup('env', 'SSH_KEY_PATH')) }}"
+
+    - name: Fail if VPS_PORT is not set
+      fail:
+        msg: "VPS_PORT environment variable must be set"
+      when: ssh_port == ""
+
+    - name: Allow ports in UFW
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+      loop:
+        - "{{ ssh_port }}"
+        - "80"
+        - "443"
+
+    - name: Remove cloud-init SSH config
+      file:
+        path: /etc/ssh/sshd_config.d/50-cloud-init.conf
+        state: absent
+      notify: Restart SSH
+
+    - name: Configure SSH port in sshd_config
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?Port '
+        line: 'Port {{ ssh_port }}'
+
+    - name: Create ssh.socket override directory
+      file:
+        path: /etc/systemd/system/ssh.socket.d
+        state: directory
+        mode: '0755'
+
+    - name: Configure SSH socket port
+      copy:
+        dest: /etc/systemd/system/ssh.socket.d/listen.conf
+        content: |
+          [Socket]
+          ListenStream=
+          ListenStream=0.0.0.0:{{ ssh_port }}
+      notify:
+        - Reload systemd
+        - Restart SSH
+
+    - name: Disable SSH password authentication
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PasswordAuthentication '
+        line: 'PasswordAuthentication no'
+      notify: Restart SSH
+
+    - name: Enable UFW with default deny
+      ufw:
+        state: enabled
+        policy: deny
+
+    - name: Configure fail2ban for SSH
+      copy:
+        dest: /etc/fail2ban/jail.local
+        content: |
+          [sshd]
+          enabled = true
+          port = {{ ssh_port }}
+          maxretry = 5
+          bantime = 3600
+      notify: Restart fail2ban
+
+  handlers:
+    - name: Reload systemd
+      systemd:
+        daemon_reload: true
+
+    - name: Restart SSH
+      systemd:
+        name: ssh.socket
+        state: restarted
+
+    - name: Restart fail2ban
+      service:
+        name: fail2ban
+        state: restarted

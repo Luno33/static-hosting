@@ -2,37 +2,27 @@
 
 ## Prerequisites
 
-Set the env var of the user you login with in the VPS
-  
-```bash
-# The user you login with in the VPS
-export LOGIN_USER=************
-
-# The absolute path to your public key to set in the authorized_key
-# for example: /home/marco/.ssh/id_rsa.pub
-export SSH_KEY_PATH=<PATH_TO_SSH_KEY>
-```
-
-Create a file named `./ansible/hosts` with this structure
-  
-```bash
-[server01]
-XXX.XXX.XXX.XXX ansible_ssh_user=************
-```
-- `XXX.XXX.XXX.XXX` is your server's IP address
-- `************` is the user to login with
-
-Install dependencies
+1. Ensure your env file (in `../envs`) contains: `VPS_USER`, `VPS_ADDRESS`, `VPS_PORT`, `SSH_KEY_PATH`
+2. Install Ansible dependencies:
 
 ```bash
+cd ./ansible
 ansible-galaxy install -r requirements.yml
 ```
 
 ## Test the connection
 
+If it runs agains the QEMU VM, the port is `2222`, which is the mounted port via QEMU.
+
 ```bash
+source ../envs/.env.qa # or ../envs/.env.prod
 cd ./ansible
-ansible-playbook ./test-connection.yml -i hosts --ask-pass
+ansible-playbook ./test-connection.yml \
+  -i "$VPS_ADDRESS," \
+  -u "$VPS_USER" \
+  --private-key "$SSH_KEY_PATH" \
+  -e "ansible_port=22" \
+  --ask-pass
 ```
 
 ## Run the setup
@@ -41,14 +31,46 @@ ansible-playbook ./test-connection.yml -i hosts --ask-pass
 
 Make sure that the user can sudo to obtain root privileges, [how to do it](../readme-assets/enable-sudo.md)
 
-### Run main ansible playbook
+### First run (server still on base port)
+
+The base port for a QEMU VM on Linux is `2222`
 
 ```bash
+source ../envs/.env.qa # or ../envs/.env.prod
 cd ./ansible
-ansible-playbook ./setup.yml -i hosts --ask-pass --ask-become-pass
+ansible-playbook ./setup.yml \
+  -i "$VPS_ADDRESS," \
+  -u "$VPS_USER" \
+  --private-key "$SSH_KEY_PATH" \
+  -e "ansible_port=22" \
+  --ask-pass --ask-become-pass
 ```
 
-If you cannot run docker due to permissions, just logout and login. Adding the user to the docker group is not reflected immediately.
+### Subsequent runs (server now on VPS_PORT)
+
+```bash
+source ../envs/.env.qa # or ../envs/.env.prod
+cd ./ansible
+ansible-playbook ./setup.yml \
+  -i "$VPS_ADDRESS," \
+  -u "$VPS_USER" \
+  --private-key "$SSH_KEY_PATH" \
+  -e "ansible_port=$VPS_PORT" \
+  --ask-become-pass
+```
+
+## Verify fail2ban
+
+```bash
+# Check status and banned IPs
+sudo fail2ban-client status sshd
+
+# Trigger 6 failed logins (uses nonexistent user)
+for i in {1..6}; do ssh -p $VPS_PORT -o BatchMode=yes fakeuser@$VPS_ADDRESS; done
+
+# Unban your IP
+sudo fail2ban-client set sshd unbanip YOUR_IP
+```
 
 ## Emulate the server
 

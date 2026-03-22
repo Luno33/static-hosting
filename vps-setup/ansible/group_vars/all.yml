@@ -1,3 +1,2 @@
 swap_file_size_mb: 2048
-docker_users: 
-      - "{{ lookup('env', 'LOGIN_USER') }}"
+ssh_port: "{{ lookup('env', 'VPS_PORT') }}"
