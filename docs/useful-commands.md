@@ -46,6 +46,23 @@ make download-db-dump ENV=qa
 make download-db-dump ENV=prod
 ```
 
+## Restore the PostgreSQL DB
+
+With this process we load on `qa` a dump of the Umami DB fetched from `prod`
+
+```bash
+# List the remote dumps available from the dev laptop
+ls -la ./umami/remote-db-dumps/db-dumps/
+# Copy the db dump you want to restore on the qa VM and give it the fixed name "umami-db-restore.sql"
+cp ./umami/remote-db-dumps/db-dumps/<filename-of-the-dump-to-restore>.sql ./umami/remote-db-dumps/db-dumps/umami-db-restore.sql
+make upload-db-dump ENV=qa
+
+# Enter the qa VM
+make enter-server ENV=qa
+# Load the prod db dump
+make restore-umami-db ENV=qa
+```
+
 ## Download a folder for backup purposes
 
 ```bash
