@@ -97,20 +97,6 @@ sudo qemu-system-x86_64 \
   -smp cores=4
 ```
 
-#### On Linux
-
-```bash
-qemu-system-x86_64 \
-  -accel kvm -cpu host \
-  -m 8G \
-  -drive file=$HOME/VMs/ubuntu-24.04.3-live-server-amd64.qcow2,format=qcow2 \
-  -boot c \
-  -vga virtio \
-  -usb -device usb-tablet \
-  -nic user,model=virtio-net-pci,hostfwd=tcp::2222-:22 \
-  -smp cores=4
-```
-
 After logging in, you'll find the local IPv4 address in the system information like this:
 
 ```bash
@@ -119,51 +105,69 @@ IPv4 address for ensX: 10.X.X.X
 
 You can store that address under `VPS_ADDRESS` in `./envs/.env.qa`.
 
-### Configure the hosts file
-
-On `./vps-setup/ansible/hosts` write:
-
-```bash
-[server01]
-127.0.0.1 ansible_port=2222 ansible_ssh_user=<VPS_USER>
-```
-
-We are defining the port 2222 as it is the port we are binding when running qemu for SSH.
-
-We'll have to use `127.0.0.1` as local IP address because QEMU forwards that port to the VM's SSH.
-
-### How to use it as a target of Ansible to it
-
-We'll need the environmental variable SSH_KEY_PATH, which is described [here](../vps-setup/README.md)
-
-#### On MacOs
-
-Since MacOS does not include sshpass, a way to send ansible commands without installing additional software is to use ansible inside docker
-
-```bash
-# From the ./vps-setup/ansible folder
-docker run -it --rm -v ./:/app/ -v "${SSH_KEY_PATH}:${SSH_KEY_PATH}" -e SSH_KEY_PATH=${SSH_KEY_PATH} alpine/ansible:2.18.6 sh
-> apk add --no-cache sshpass
-> cd app
-> export ANSIBLE_HOST_KEY_CHECKING=False
-```
-
 #### On Linux
 
+Define in `./envs/.env.qa`, in the `VPS_PORT` parameter which will be the new port for SSH after Ansible will configure it.
+
 ```bash
-# From the ./vps-setup/ansible folder
-sudo docker run -it --network host --rm -v ./:/app/ -v "${SSH_KEY_PATH}:${SSH_KEY_PATH}" -e SSH_KEY_PATH=${SSH_KEY_PATH} alpine/ansible:2.18.6 sh
-> apk add --no-cache sshpass
-> cd app
-> export ANSIBLE_HOST_KEY_CHECKING=False
+source ./envs/.env.qa
+qemu-system-x86_64 \
+  -accel kvm -cpu host \
+  -m 8G \
+  -drive file=$HOME/VMs/ubuntu-24.04.3-live-server-amd64.qcow2,format=qcow2 \
+  -boot c \
+  -vga virtio \
+  -usb -device usb-tablet \
+  -nic user,model=virtio-net-pci,hostfwd=tcp::2222-:22,hostfwd=tcp::${VPS_PORT}-:${VPS_PORT} \
+  -smp cores=4
 ```
+
+You can store `127.0.0.1` under `VPS_ADDRESS` in `./envs/.env.qa`.
 
 ### Verify SSH connection
 
 From inside the previous step container:
 
 ```bash
-ssh -p 2222 <your_username>@127.0.0.1
+source ./envs/.env.qa
+
+# On Linux
+ssh -p 2222 $VPS_USER@$VPS_ADDRESS
+
+# On MacOs
+ssh -p 22 $VPS_USER@$VPS_ADDRESS
+```
+
+### How to use it as a target of Ansible to it
+
+#### On MacOs
+
+Since MacOS does not include sshpass, a way to send ansible commands without installing additional software is to use ansible inside docker
+
+```bash
+docker run -it --rm \
+  -w /app/vps-setup \
+  -v ./envs/.env.qa:/app/envs/.env.qa \
+  -v ./vps-setup/ansible:/app/vps-setup/ansible \
+  -v "${SSH_KEY_PATH}:${SSH_KEY_PATH}" \
+  -v "${SSH_KEY_PATH}.pub:${SSH_KEY_PATH}.pub" \
+  alpine/ansible:2.18.6 sh
+> apk add --no-cache sshpass
+> export ANSIBLE_HOST_KEY_CHECKING=False
+```
+
+#### On Linux
+
+```bash
+sudo -E docker run -it --network host --rm \
+  -w /app/vps-setup \
+  -v ./envs/.env.qa:/app/envs/.env.qa \
+  -v ./vps-setup/ansible:/app/vps-setup/ansible \
+  -v "${SSH_KEY_PATH}:${SSH_KEY_PATH}" \
+  -v "${SSH_KEY_PATH}.pub:${SSH_KEY_PATH}.pub" \
+  alpine/ansible:2.18.6 sh
+> apk add --no-cache sshpass
+> export ANSIBLE_HOST_KEY_CHECKING=False
 ```
 
 ### Next Steps
