@@ -42,7 +42,7 @@ Fields explanation:
 | Field | Explanation |
 | --- | --- |
 | ENV | The environment, for example `dev`, `qa` and `prod` |
-| DOMAIN | Domain used by Caddy. For exposing the website on localhost choose `localhost`, in production use the domain you've bought like `domain.com` |
+| DOMAIN | Domain used by Caddy. For exposing the website on localhost choose `localhost` (for `dev` and `qa`), in production use the domain you've bought like `domain.com` |
 | UMAMI_HASH_SALT | Random unique string useful for umami |
 | POSTGRES_USER | New username for umami database |
 | POSTGRES_PASSWORD | The password for that new user |
@@ -52,7 +52,7 @@ Fields explanation:
 | VPS_ADDRESS | The address of the remote machine that will run the containers, could be a local address for the VM or a remote address for the production server |
 | VPS_PORT | The port on the server that accepts SSH connections |
 | VPS_USER | The user that is configured on the machine located at `VPS_ADDRESS` |
-| SSH_KEY_PATH | (Optional) is the absolute path for the SSH key to use to access the VM or the remote VPS |
+| SSH_KEY_PATH | Is the absolute path for the SSH private key to use to access the VM or the remote VPS |
 
 Environmental Variables needed by the NextJS frontend will be placed in the root directory of `WEBSITE_PROJECT_PATH` and will be called `.env-build-dev`, `.env-build-qa` and `.env-build-prod`. Inside there will be the variables like:
 
