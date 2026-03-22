@@ -47,7 +47,7 @@
       authorized_key:
         user: "{{ ansible_user }}"
         state: present
-        key: "{{ lookup('file', lookup('env', 'SSH_KEY_PATH')) }}"
+        key: "{{ lookup('file', lookup('env', 'SSH_KEY_PATH') + '.pub') }}"
 
     - name: Fail if VPS_PORT is not set
       fail:
