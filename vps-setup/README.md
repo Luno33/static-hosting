@@ -5,10 +5,10 @@ With the following guide you'll configure a VPS or the optional QEMU Virtual Mac
 ## Prerequisites
 
 1. Ensure your env file (in `../envs`) contains: `VPS_USER`, `VPS_ADDRESS`, `VPS_PORT`, `SSH_KEY_PATH`
-2. Load your SSH key into the agent:
+2. Load your SSH key into the agent (120s timeout: key is only needed for initial connection, SSH sessions persist after auth. Agent forwarding prevents key exfiltration; timeout limits exposure window):
     ```bash
     source ./envs/.env.qa  # or ./envs/.env.prod
-    ssh-add -t 120 "$SSH_KEY_PATH"  # confirm each use, 2 min timeout
+    ssh-add -t 120 "$SSH_KEY_PATH"
     ```
 3. Start the Ansible container:
     - **MacOS:**
